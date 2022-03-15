@@ -8,17 +8,4 @@ We want to create a schedule S for a single machine (one job at a time), based o
 
 Such that the total tardiness is minimized, total = ($\sum(i = 0...n)$ max(f<sub>i</sub> - d<sub>i</sub>, 0))
 
-Jobs can not be preempted once started.
-
-### Training data
-
-CSV Format:
-```
-feature1, feature2, feature3, actual_processing_time
-feature1, feature2, feature3, actual_processing_time
-...
-```
-
-```
-
-```
+Jobs can be preempted at any point without cost.
