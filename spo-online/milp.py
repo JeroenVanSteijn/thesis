@@ -100,4 +100,4 @@ class FlexibleJobShop:
             print("Could not solve to optimality")
 
         schedule = pd.DataFrame(results)
-        return schedule
+        return self.model.objVal, schedule
