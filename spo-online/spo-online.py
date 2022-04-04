@@ -1,51 +1,16 @@
-import pandas as pd
-import mip
-
-def solve_directly(number_machines, dependencies, processing_times):
-   # Upfront parameters of the problem
-   number_jobs = len(processing_times)
-
-   # Create model variables
-   model = mip.Model()
-   c = model.add_var(name="C")
-
-   # TODO: Create MIP for multi-machine problem.
-   model.objective = c
-   model.optimize()
-   print(model.objective_value)
-
-def solve_with_prediction(dependencies, features):
-   predicted_processing_times = predict_processing_times(features)
-   # TODO: calculate the cost of the allocation with the actual processing times.
-   return solve_directly(dependencies, predicted_processing_times)
-
-def train_with_prediction(dependencies, features):
-   predicted_processing_times = predict_processing_times(features)
-   solve_directly(dependencies, predicted_processing_times)
-   # TODO: calculate the cost of the allocation with the actual processing times.
-   # TODO: return the decision error to the predictor here.
-
-def predict_processing_times(features):
-   return [1, 1] # TODO  
+import importlib.util
+from milp import FlexibleJobShop
 
 def run():
-   size = 1
-   training = True
-   for i in range(size):
-      number_machines = pd.read_csv("../data/uncertain-processing-time/"+str(i)+"/nr_machines.csv")[0][0]
-      jobs = pd.read_csv("../data/uncertain-processing-time/"+str(i)+"/job_features.csv")
-      dependencies = pd.read_csv("../data/uncertain-processing-time/"+str(i)+"/dependencies.csv")
-      features = jobs.iloc[:,0:-1].values
-      actual_processing_times = jobs.iloc[:,-1].values
-
-      optimal_solution_cost = solve_directly(number_machines, dependencies, actual_processing_times)
-
-      if training:
-         train_with_prediction(dependencies, features)
-      else:
-         with_prediction_cost = solve_with_prediction(dependencies, features)
-         decision_error_based_on_predictions = with_prediction_cost - optimal_solution_cost
-         print(decision_error_based_on_predictions)
+   nr_instances = 5
+   for i in range(0, nr_instances):
+      fileName = 'FJSP_' + str(i)
+      spec = importlib.util.spec_from_file_location('instance', "instances/" + fileName + '.py')
+      mod = importlib.util.module_from_spec(spec)
+      spec.loader.exec_module(mod)
+      alg = FlexibleJobShop(jobs=mod.jobs, machines=mod.machines, processingTimes=mod.processingTimes, machineAlternatives=
+      mod.machineAlternatives, operations=mod.operations, instance=fileName, changeOvers=mod.changeOvers, orders=mod.orders)
+      schedule = alg.build_model()
 
 if __name__ == "__main__":
    run()
