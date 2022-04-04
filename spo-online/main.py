@@ -1,12 +1,19 @@
 import importlib.util
+import torch
+
 from milp import FlexibleJobShop
+from machineLearner import LinearRegression
 
 def load_mod(fileName):
    spec = importlib.util.spec_from_file_location('instance', "instances/" + fileName + '.py')
    mod = importlib.util.module_from_spec(spec)
    spec.loader.exec_module(mod)
    return mod
-   
+
+def get_features(fileName):
+   mod = load_mod(fileName)
+   mod.features
+
 def get_optimal(instance_nr):
    fileName = 'FJSP_' + str(instance_nr)
    mod = load_mod(fileName)
@@ -47,14 +54,25 @@ def get_predicted(instance_nr):
 
 def calculate_cost(instance_nr, schedule):
    fileName = 'FJSP_' + str(instance_nr)
-   # TODO: can we make cost calculation non-MIP-specific?
+   # TODO: Calculate cost
+   return 5
 
 def run():
    nr_instances = 5
+   model = LinearRegression(5, 1)
+   criterion = torch.nn.MSELoss()
+   optimizer = torch.optim.SGD(model.parameters(), lr=0.01)
+
    for i in range(0, nr_instances):
       predicted_schedule = get_predicted(i)
       optimal_makespan, optimal_schedule = get_optimal(i)
       cost_predicted_schedule = calculate_cost(i, predicted_schedule)
+      
+      outputs = model(inputs)
+      loss = criterion(outputs, )
+
+
+
 
 if __name__ == "__main__":
    run()

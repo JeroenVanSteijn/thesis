@@ -78,6 +78,8 @@ class FlexibleJobShop:
         # 8.  Minimize make span, make span is bigger than all finish times of jobs
         self.model.addConstrs((f[i] <= Cmax for i in J), 'objectiveConstraint')
 
+        self.model.setParam('TimeLimit', 20) # Time limited
+
         self.model.update()
         self.model.optimize()
 
@@ -97,7 +99,7 @@ class FlexibleJobShop:
         if self.model.status == GRB.OPTIMAL:
             print('The make span is ', self.model.objVal)
         else:
-            print("Could not solve to optimality")
+            print('The sub-optimal found make span is ', self.model.objVal)
 
         schedule = pd.DataFrame(results)
         return self.model.objVal, schedule
