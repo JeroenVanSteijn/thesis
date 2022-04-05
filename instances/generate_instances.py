@@ -5,6 +5,7 @@ def generate_features(time):
     features = []
     for _ in range(5):
         features.append(time+random.uniform(0, 2))
+
     return features
 
 # Random instance generator
@@ -95,7 +96,7 @@ for inst in range(nr_instances):
         f.write(str(processingTimes))
         f.write('\n')
         f.write("features = ")
-        f.write(str(processingTimes))
+        f.write(str(features))
         f.write('\n')
         f.write("changeOvers = ")
         f.write(str(change_overs))
