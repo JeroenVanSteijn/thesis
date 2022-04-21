@@ -1,17 +1,13 @@
+import operator
 import os
 import pandas as pd
 from matplotlib.pyplot import (
-    axhline,
-    clf,
     figure,
-    gca,
     legend,
     plot,
-    fill_between,
     show,
     title,
-    xlabel,
-    ylabel,
+    gca
 )
 
 def run():
@@ -19,14 +15,22 @@ def run():
     figureIndex = 0
     last_dir = max(dirs)
     instances = os.listdir("results/" + last_dir)
+    figure()
     for instance in instances:
         file_location = "results/" + last_dir + "/" + instance
         data = pd.read_csv(file_location)
         groupedByEpoch = data.groupby(data.iloc[:, 0]).mean()
         yData = groupedByEpoch.iloc[:, 1]
-        figure()
         figureIndex = figureIndex + 1
-        plot(yData, label=instance)
+        plot(yData, label=instance.replace('.csv', ''))
+        
+        # Order legend by label sorting
+        handles, labels = gca().get_legend_handles_labels()
+        hl = sorted(zip(handles, labels),
+                    key=operator.itemgetter(1))
+        handles2, labels2 = zip(*hl)
+        gca().legend(handles2, labels2)
+
     
     show()
     title("Experiment " + last_dir)
