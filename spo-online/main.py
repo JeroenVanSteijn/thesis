@@ -90,7 +90,7 @@ def run():
       predicted_processing_times = get_predicted_processing_times(i, model, criterion, optimizer, True)
       predicted_schedule = get_predicted_schedule(i, predicted_processing_times)
       optimal_makespan, optimal_schedule = get_optimal(i)
-      cost_predicted_schedule = calculate_cost(i, predicted_schedule)
+
 
 if __name__ == "__main__":
    run()
