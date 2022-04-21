@@ -3,8 +3,10 @@ import random
 
 def generate_features(time):
     features = []
+    std_dev = 5
+    
     for _ in range(5):
-        features.append(time+random.uniform(0, 2))
+        features.append(time+random.triangular(0, 3, 3) - 3)
 
     return features
 
