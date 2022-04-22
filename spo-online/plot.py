@@ -3,7 +3,6 @@ import os
 import pandas as pd
 from matplotlib.pyplot import (
     figure,
-    legend,
     plot,
     show,
     title,
@@ -12,7 +11,6 @@ from matplotlib.pyplot import (
 
 def run():
     dirs = os.listdir("results")
-    figureIndex = 0
     last_dir = max(dirs)
     instances = os.listdir("results/" + last_dir)
     figure()
@@ -21,19 +19,21 @@ def run():
         data = pd.read_csv(file_location)
         groupedByEpoch = data.groupby(data.iloc[:, 0]).mean()
         yData = groupedByEpoch.iloc[:, 1]
-        figureIndex = figureIndex + 1
-        plot(yData, label=instance.replace('.csv', ''))
+        plot(yData, label='Instance ' + instance.replace('.csv', ''))
         
         # Order legend by label sorting
-        handles, labels = gca().get_legend_handles_labels()
-        hl = sorted(zip(handles, labels),
-                    key=operator.itemgetter(1))
+        ax = gca()
+        handles, labels = ax.get_legend_handles_labels()
+        hl = sorted(zip(handles, labels), key=operator.itemgetter(1))
         handles2, labels2 = zip(*hl)
-        gca().legend(handles2, labels2)
+        ax.legend(handles2, labels2)
+
+        ax.set_ylabel('Prediction error')
+        ax.set_xlabel('Number of epochs')
 
     
+    title("Linear regression trained on generated data")
     show()
-    title("Experiment " + last_dir)
 
 if __name__ == "__main__":
     run()
