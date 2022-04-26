@@ -12,6 +12,7 @@ from matplotlib.pyplot import (
 def run():
     dirs = os.listdir("results")
     last_dir = max(dirs)
+    print(last_dir)
     instances = os.listdir("results/" + last_dir)
     figure()
     for instance in instances:
@@ -28,11 +29,11 @@ def run():
         handles2, labels2 = zip(*hl)
         ax.legend(handles2, labels2)
 
-        ax.set_ylabel('Prediction error')
+        ax.set_ylabel('SPO loss')
         ax.set_xlabel('Number of epochs')
 
     
-    title("Linear regression trained on generated data")
+    title("Minimizing wait time, trained on prediction error")
     show()
 
 if __name__ == "__main__":

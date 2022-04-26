@@ -5,89 +5,57 @@ import time
 import torch
 
 from milp import FlexibleJobShop
-from machineLearner import LinearRegression
+from machineLearner import LinearRegression, MLP
 
+def get_filename_for_index(index):
+   return str(index)
 
 def load_mod(fileName):
-    spec = importlib.util.spec_from_file_location(
-        'instance', "instances/" + fileName + '.py')
-    mod = importlib.util.module_from_spec(spec)
-    spec.loader.exec_module(mod)
-    return mod
-
+   spec = importlib.util.spec_from_file_location('instance', "./instances/" + fileName + '.py')
+   mod = importlib.util.module_from_spec(spec)
+   spec.loader.exec_module(mod)
+   return mod
 
 def get_features(fileName):
-    mod = load_mod(fileName)
-    mod.features
+   mod = load_mod(fileName)
+   mod.features
 
 
-def get_optimal(instance_nr):
-    fileName = 'FJSP_' + str(instance_nr)
-    mod = load_mod(fileName)
+def get_actual_processing_times(instance_nr):
+   fileName = get_filename_for_index(instance_nr)
+   mod = load_mod(fileName)
+   return mod.processingTimes
 
-    mip = FlexibleJobShop(jobs=mod.jobs,
-                          machines=mod.machines,
-                          processingTimes=mod.processingTimes,
-                          machineAlternatives=mod.machineAlternatives,
-                          operations=mod.operations,
-                          instance=fileName,
-                          changeOvers=mod.changeOvers,
-                          orders=mod.orders)
-    optimal_makespan, optimal_schedule = mip.build_model()
+def get_predicted_processing_times(instance_nr, model, criterion, optimizer, actualProcessingTimes):
+   fileName = get_filename_for_index(instance_nr)
+   mod = load_mod(fileName)
+   predictedProcessingTimes = {}
 
-    return optimal_makespan, optimal_schedule
+   for jobKey in mod.features:
+      features = mod.features[jobKey]
+      predictedTime = model(torch.FloatTensor(features))
+      actualProcessingTime = torch.Tensor([actualProcessingTimes[jobKey]])
+      loss = criterion(predictedTime, actualProcessingTime)
+      optimizer.zero_grad()
+      loss.backward()
+      optimizer.step()
+      roundedPredictedTime = torch.round(predictedTime)
+      predictedProcessingTimes[jobKey] = roundedPredictedTime.item()
 
+   return predictedProcessingTimes
 
-def get_predicted_processing_times(instance_nr, model, criterion, optimizer,
-                                   isTraining, writeXY):
-    fileName = 'FJSP_' + str(instance_nr)
-    mod = load_mod(fileName)
-    predictedProcessingTimes = {}
-    actualProcessingTimes = mod.processingTimes
-
-    # Note that we do these epochs from the start as a sort of warm start...
-    nr_epochs = 25
-    for epochIndex in range(nr_epochs):
-        for jobKey in mod.features:
-            features = mod.features[jobKey]
-            predictedTime = model(torch.FloatTensor(features))
-            roundedPredictedTime = int(torch.round(predictedTime).item())
-            actualProcessingTime = torch.Tensor(
-                [actualProcessingTimes[jobKey]])
-            predictedProcessingTimes[jobKey] = roundedPredictedTime
-
-            if isTraining:
-                loss = criterion(predictedTime, actualProcessingTime)
-                writeXY(epochIndex, loss.item())
-                optimizer.zero_grad()
-                loss.backward()
-                optimizer.step()
-
-    return predictedProcessingTimes
+def calculate_cost(schedule, processingTimes):
+    cost = 0
+    for index, _jobKey in enumerate(schedule):
+        waitTime = 0
+        for i in range(index):
+            waitTime += processingTimes[schedule[i]]
+        cost = cost + waitTime
+    return cost
 
 
-def get_predicted_schedule(instance_nr, predicted_processing_times):
-    fileName = 'FJSP_' + str(instance_nr)
-    mod = load_mod(fileName)
-
-    mip = FlexibleJobShop(jobs=mod.jobs,
-                          machines=mod.machines,
-                          processingTimes=predicted_processing_times,
-                          machineAlternatives=mod.machineAlternatives,
-                          operations=mod.operations,
-                          instance=fileName,
-                          changeOvers=mod.changeOvers,
-                          orders=mod.orders)
-    _, opt_schedule_predicted = mip.build_model()
-
-    return opt_schedule_predicted
-
-
-def calculate_cost(instance_nr, schedule):
-    fileName = 'FJSP_' + str(instance_nr)
-    # TODO: Calculate cost of the schedule which is based on the predicted processing times when working with the actual processing times.
-    return 5
-
+def find_optimal_schedule(processingTimes):
+    return sorted(processingTimes, key=processingTimes.get)
 
 def run():
     nr_instances = 5
@@ -96,20 +64,30 @@ def run():
     optimizer = torch.optim.SGD(model.parameters(), lr=0.0001)
     model.train()
 
+    nr_epochs = 1000
     timestr = time.strftime("%Y%m%d-%H%M%S")
-    for i in range(0, nr_instances):
-       dir = 'results/results_' + timestr
-       os.makedirs(dir , exist_ok=True)
-       with open(dir + '/' + str(i) + '.csv', 'w') as f:
-            writer = csv.writer(f)
 
+    for i in range(0, nr_instances):
+        dir = 'results/results_' + timestr
+        os.makedirs(dir , exist_ok=True)
+        with open(dir + '/' + str(i) + '.csv', 'w') as f:
+            writer = csv.writer(f)
             def writeXY(x, y):
                 writer.writerow([x, y])
 
-            predicted_processing_times = get_predicted_processing_times(
-                i, model, criterion, optimizer, True, writeXY)
-            # predicted_schedule = get_predicted_schedule(i, predicted_processing_times)
-            # optimal_makespan, optimal_schedule = get_optimal(i)
+            for epoch_nr in range(0, nr_epochs):
+                actualProcessingTimes = get_actual_processing_times(i)
+                predictedProcessingTimes = get_predicted_processing_times(i, model, criterion, optimizer, actualProcessingTimes)
+
+                predictedSchedule = find_optimal_schedule(predictedProcessingTimes)
+                optimalSchedule = find_optimal_schedule(actualProcessingTimes)
+
+                predictedScheduleCostOnActual = calculate_cost(predictedSchedule, actualProcessingTimes)
+                optimalCost = calculate_cost(optimalSchedule, actualProcessingTimes)
+
+                writeXY(epoch_nr, predictedScheduleCostOnActual - optimalCost)
+
+
 
 
 if __name__ == "__main__":
