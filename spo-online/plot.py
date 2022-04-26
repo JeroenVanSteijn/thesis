@@ -17,7 +17,7 @@ def run():
     figure()
     for instance in instances:
         file_location = "results/" + last_dir + "/" + instance
-        data = pd.read_csv(file_location)
+        data = pd.read_csv(file_location, header=None)
         groupedByEpoch = data.groupby(data.iloc[:, 0]).mean()
         yData = groupedByEpoch.iloc[:, 1]
         plot(yData, label='Instance ' + instance.replace('.csv', ''))

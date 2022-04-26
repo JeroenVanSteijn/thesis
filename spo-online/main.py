@@ -26,7 +26,7 @@ def get_actual_processing_times(instance_nr):
    mod = load_mod(fileName)
    return mod.processingTimes
 
-def get_predicted_processing_times(instance_nr, model, criterion, optimizer, actualProcessingTimes):
+def get_predicted_processing_times(instance_nr, model, criterion, optimizer, actualProcessingTimes, epoch, writeXY):
    fileName = get_filename_for_index(instance_nr)
    mod = load_mod(fileName)
    predictedProcessingTimes = {}
@@ -41,6 +41,7 @@ def get_predicted_processing_times(instance_nr, model, criterion, optimizer, act
       optimizer.step()
       roundedPredictedTime = torch.round(predictedTime)
       predictedProcessingTimes[jobKey] = roundedPredictedTime.item()
+    #   writeXY(epoch, loss.item()) => for evaluating the pred error.
 
    return predictedProcessingTimes
 
@@ -77,15 +78,16 @@ def run():
 
             for epoch_nr in range(0, nr_epochs):
                 actualProcessingTimes = get_actual_processing_times(i)
-                predictedProcessingTimes = get_predicted_processing_times(i, model, criterion, optimizer, actualProcessingTimes)
+                predictedProcessingTimes = get_predicted_processing_times(i, model, criterion, optimizer, actualProcessingTimes, epoch_nr, writeXY)
 
+                # BELOW FOR EXPERIMENT OF SPO LOSS 
                 predictedSchedule = find_optimal_schedule(predictedProcessingTimes)
                 optimalSchedule = find_optimal_schedule(actualProcessingTimes)
 
                 predictedScheduleCostOnActual = calculate_cost(predictedSchedule, actualProcessingTimes)
                 optimalCost = calculate_cost(optimalSchedule, actualProcessingTimes)
-
-                writeXY(epoch_nr, predictedScheduleCostOnActual - optimalCost)
+                loss = predictedScheduleCostOnActual - optimalCost
+                writeXY(epoch_nr, loss)
 
 
 
