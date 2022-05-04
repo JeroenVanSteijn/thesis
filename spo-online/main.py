@@ -79,11 +79,11 @@ def run():
                 optimalSchedule = find_optimal_schedule(actualProcessingTimes) # this is theta
                 optimalCost = calculate_cost(optimalSchedule, actualProcessingTimes) # this is v*theta
                 twoPredMinActual = find_optimal_schedule(tensorToRoundedInt(2 * predictions - torch.FloatTensor(list(actualProcessingTimes.values())))) # this is 2theta hat - theta
-                vTwoPredMinActual = calculate_cost(twoPredMinActual, actualProcessingTimes) # this is v*(2theta hat - theta)
+                vTwoPredMinActual = calculate_cost(twoPredMinActual, actualProcessingTimes) # this is v*(2theta hat - theta) -> is v* evaluation on the actual processingtimes indeed?
                 deltaL = optimalCost - vTwoPredMinActual
 
-                predictions.zero_grad() # -> Tensor' object has no attribute 'zero_grad'
-                predictions.backward() # -> grad can be implicitly created only for scalar outputs
+                optimizer.zero_grad() # -> Tensor' object has no attribute 'zero_grad'
+                predictions.backward(torch.Tensor([1, 1, 1, 1, 1, 1, 1, 1, 1, 1]))
                 with torch.no_grad():
                     for p in model.parameters():
                         if p.grad is not None:
