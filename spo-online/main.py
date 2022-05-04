@@ -78,12 +78,10 @@ def run():
                 # calculates Delta L
                 optimalSchedule = find_optimal_schedule(actualProcessingTimes) # this is theta
                 optimalCost = calculate_cost(optimalSchedule, actualProcessingTimes) # this is v*theta
-
                 twoPredMinActual = find_optimal_schedule(tensorToRoundedInt(2 * predictions - torch.FloatTensor(list(actualProcessingTimes.values())))) # this is 2theta hat - theta
                 vTwoPredMinActual = calculate_cost(twoPredMinActual, actualProcessingTimes) # this is v*(2theta hat - theta)
                 deltaL = optimalCost - vTwoPredMinActual
 
-                print()
                 predictions.zero_grad() # -> Tensor' object has no attribute 'zero_grad'
                 predictions.backward() # -> grad can be implicitly created only for scalar outputs
                 with torch.no_grad():
@@ -92,6 +90,7 @@ def run():
                             new_grad = p.grad * deltaL
                             p.grad.copy_(new_grad)
 
+                # Write the SPO loss for this epoch
                 predictedScheduleCostOnActual = calculate_cost(predictedSchedule, actualProcessingTimes)
                 loss = predictedScheduleCostOnActual - optimalCost
                 writeXY(epoch_nr, loss)
