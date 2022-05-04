@@ -11,7 +11,7 @@ def generate_processing_time(index):
     return random.randint(0, 10)
 
 # Random instance generator
-nr_instances = 5
+nr_instances = 1
 nr_jobs_per_instance = 10
 
 # Define general file name for instances

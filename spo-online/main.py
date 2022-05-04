@@ -3,9 +3,8 @@ import importlib.util
 import os
 import time
 import torch
-
-from milp import FlexibleJobShop
-from machineLearner import LinearRegression, MLP
+import numpy
+from machineLearner import MLP
 
 def get_filename_for_index(index):
    return str(index)
@@ -26,25 +25,6 @@ def get_actual_processing_times(instance_nr):
    mod = load_mod(fileName)
    return mod.processingTimes
 
-def get_predicted_processing_times(instance_nr, model, criterion, optimizer, actualProcessingTimes, epoch, writeXY):
-   fileName = get_filename_for_index(instance_nr)
-   mod = load_mod(fileName)
-   predictedProcessingTimes = {}
-
-   for jobKey in mod.features:
-      features = mod.features[jobKey]
-      predictedTime = model(torch.FloatTensor(features))
-      actualProcessingTime = torch.Tensor([actualProcessingTimes[jobKey]])
-      loss = criterion(predictedTime, actualProcessingTime)
-      optimizer.zero_grad()
-      loss.backward()
-      optimizer.step()
-      roundedPredictedTime = torch.round(predictedTime)
-      predictedProcessingTimes[jobKey] = roundedPredictedTime.item()
-    #   writeXY(epoch, loss.item()) => for evaluating the pred error.
-
-   return predictedProcessingTimes
-
 def calculate_cost(schedule, processingTimes):
     cost = 0
     for index, _jobKey in enumerate(schedule):
@@ -58,17 +38,24 @@ def calculate_cost(schedule, processingTimes):
 def find_optimal_schedule(processingTimes):
     return sorted(processingTimes, key=processingTimes.get)
 
+def tensorToRoundedInt(tensor):
+    list = numpy.rint(tensor.cpu().detach().numpy()).tolist()
+    result = dict(enumerate(list))
+    return result
+
 def run():
-    nr_instances = 5
-    model = LinearRegression(5, 1)
-    criterion = torch.nn.MSELoss()
-    optimizer = torch.optim.SGD(model.parameters(), lr=0.0001)
+    nr_instances = 1
+    model = MLP()
+    optimizer = torch.optim.SGD(model.parameters(), lr=0.01)
     model.train()
 
     nr_epochs = 1000
     timestr = time.strftime("%Y%m%d-%H%M%S")
 
     for i in range(0, nr_instances):
+        fileName = get_filename_for_index(i)
+        mod = load_mod(fileName)
+        actualProcessingTimes = get_actual_processing_times(i)
         dir = 'results/results_' + timestr
         os.makedirs(dir , exist_ok=True)
         with open(dir + '/' + str(i) + '.csv', 'w') as f:
@@ -77,20 +64,37 @@ def run():
                 writer.writerow([x, y])
 
             for epoch_nr in range(0, nr_epochs):
-                actualProcessingTimes = get_actual_processing_times(i)
-                predictedProcessingTimes = get_predicted_processing_times(i, model, criterion, optimizer, actualProcessingTimes, epoch_nr, writeXY)
+                inputValues = []
+                for jobKey in mod.features:
+                    inputValues += mod.features[jobKey]
+                inputTensor = torch.FloatTensor(inputValues)
 
-                # BELOW FOR EXPERIMENT OF SPO LOSS 
-                predictedSchedule = find_optimal_schedule(predictedProcessingTimes)
-                optimalSchedule = find_optimal_schedule(actualProcessingTimes)
+                predictions = model(inputTensor)
+                print(predictions) # tensor([ 1.1386,  0.8613,  1.1422, -0.3874,  0.0909,  1.6789,  0.2854, -0.3183, -1.2711,  1.7652], grad_fn=<AddBackward0>)
+
+                roundedIntegerPredictedValues = tensorToRoundedInt(predictions)
+                predictedSchedule = find_optimal_schedule(roundedIntegerPredictedValues)
+
+                # calculates Delta L
+                optimalSchedule = find_optimal_schedule(actualProcessingTimes) # this is theta
+                optimalCost = calculate_cost(optimalSchedule, actualProcessingTimes) # this is v*theta
+
+                twoPredMinActual = find_optimal_schedule(tensorToRoundedInt(2 * predictions - torch.FloatTensor(list(actualProcessingTimes.values())))) # this is 2theta hat - theta
+                vTwoPredMinActual = calculate_cost(twoPredMinActual, actualProcessingTimes) # this is v*(2theta hat - theta)
+                deltaL = optimalCost - vTwoPredMinActual
+
+                print()
+                predictions.zero_grad() # -> Tensor' object has no attribute 'zero_grad'
+                predictions.backward() # -> grad can be implicitly created only for scalar outputs
+                with torch.no_grad():
+                    for p in model.parameters():
+                        if p.grad is not None:
+                            new_grad = p.grad * deltaL
+                            p.grad.copy_(new_grad)
 
                 predictedScheduleCostOnActual = calculate_cost(predictedSchedule, actualProcessingTimes)
-                optimalCost = calculate_cost(optimalSchedule, actualProcessingTimes)
                 loss = predictedScheduleCostOnActual - optimalCost
                 writeXY(epoch_nr, loss)
-
-
-
 
 if __name__ == "__main__":
     run()

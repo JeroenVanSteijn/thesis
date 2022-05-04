@@ -17,11 +17,11 @@ class MLP(torch.nn.Module):
   def __init__(self):
     super().__init__()
     self.layers = torch.nn.Sequential(
-      torch.nn.Linear(5, 10),
+      torch.nn.Linear(50, 150),
       torch.nn.ReLU(),
-      torch.nn.Linear(10, 5),
+      torch.nn.Linear(150, 20),
       torch.nn.ReLU(),
-      torch.nn.Linear(5, 1)
+      torch.nn.Linear(20, 10)
     )
 
 
