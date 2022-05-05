@@ -46,10 +46,10 @@ def tensorToRoundedInt(tensor):
 def run():
     nr_instances = 1
     model = MLP()
-    optimizer = torch.optim.SGD(model.parameters(), lr=0.01)
+    optimizer = torch.optim.SGD(model.parameters(), lr=0.00005)
     model.train()
 
-    nr_epochs = 1000
+    nr_epochs = 10000
     timestr = time.strftime("%Y%m%d-%H%M%S")
 
     for i in range(0, nr_instances):
@@ -64,36 +64,53 @@ def run():
                 writer.writerow([x, y])
 
             for epoch_nr in range(0, nr_epochs):
+                # spo = epoch_nr > nr_epochs / 2 # Do the first half of training through prediction-error based training.
+                spo = True
+
                 inputValues = []
                 for jobKey in mod.features:
                     inputValues += mod.features[jobKey]
                 inputTensor = torch.FloatTensor(inputValues)
-
                 predictions = model(inputTensor)
-                print(predictions) # tensor([ 1.1386,  0.8613,  1.1422, -0.3874,  0.0909,  1.6789,  0.2854, -0.3183, -1.2711,  1.7652], grad_fn=<AddBackward0>)
+                print(predictions)
 
-                roundedIntegerPredictedValues = tensorToRoundedInt(predictions)
-                predictedSchedule = find_optimal_schedule(roundedIntegerPredictedValues)
+                # SPO+ loss
+                if spo:
+                    roundedIntegerPredictedValues = tensorToRoundedInt(predictions)
+                    predictedSchedule = find_optimal_schedule(roundedIntegerPredictedValues)
+                    optimalSchedule = find_optimal_schedule(actualProcessingTimes) # this is theta
+                    optimalCost = calculate_cost(optimalSchedule, actualProcessingTimes) # this is v*theta
+                    twoPredMinActual = find_optimal_schedule(tensorToRoundedInt(2 * predictions - torch.FloatTensor(list(actualProcessingTimes.values())))) # this is 2theta hat - theta
+                    vTwoPredMinActual = calculate_cost(twoPredMinActual, actualProcessingTimes) # this is v*(2theta hat - theta) -> is v* evaluation on the actual processingtimes indeed?
+                    deltaL = optimalCost - vTwoPredMinActual
 
-                # calculates Delta L
-                optimalSchedule = find_optimal_schedule(actualProcessingTimes) # this is theta
-                optimalCost = calculate_cost(optimalSchedule, actualProcessingTimes) # this is v*theta
-                twoPredMinActual = find_optimal_schedule(tensorToRoundedInt(2 * predictions - torch.FloatTensor(list(actualProcessingTimes.values())))) # this is 2theta hat - theta
-                vTwoPredMinActual = calculate_cost(twoPredMinActual, actualProcessingTimes) # this is v*(2theta hat - theta) -> is v* evaluation on the actual processingtimes indeed?
-                deltaL = optimalCost - vTwoPredMinActual
+                    optimizer.zero_grad() # -> Tensor' object has no attribute 'zero_grad'
+                    predictions.backward(torch.Tensor([1, 1, 1, 1, 1, 1, 1, 1, 1, 1]))
+                    with torch.no_grad():
+                        for p in model.parameters():
+                            if p.grad is not None:
+                                new_grad = p.grad * deltaL
+                                p.grad.copy_(new_grad)
 
-                optimizer.zero_grad() # -> Tensor' object has no attribute 'zero_grad'
-                predictions.backward(torch.Tensor([1, 1, 1, 1, 1, 1, 1, 1, 1, 1]))
-                with torch.no_grad():
-                    for p in model.parameters():
-                        if p.grad is not None:
-                            new_grad = p.grad * deltaL
-                            p.grad.copy_(new_grad)
+                    torch.nn.utils.clip_grad_norm_(model.parameters(), 1) # gradient clipping
 
-                # Write the SPO loss for this epoch
-                predictedScheduleCostOnActual = calculate_cost(predictedSchedule, actualProcessingTimes)
-                loss = predictedScheduleCostOnActual - optimalCost
-                writeXY(epoch_nr, loss)
+                    optimizer.step()
+
+                    # Write the SPO loss for this epoch
+                    predictedScheduleCostOnActual = calculate_cost(predictedSchedule, actualProcessingTimes)
+                    loss = predictedScheduleCostOnActual - optimalCost
+                    writeXY(epoch_nr, loss)
+
+                # MSE loss
+                else:
+                    actual = torch.FloatTensor(list(actualProcessingTimes.values()))
+                    criterion = torch.nn.MSELoss()
+                    loss = criterion(predictions, actual)
+                    optimizer.zero_grad()
+                    loss.backward()
+                    optimizer.step()
+
+
 
 if __name__ == "__main__":
     run()
