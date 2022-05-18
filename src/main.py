@@ -70,8 +70,10 @@ def run():
                 writer.writerow([x, y])
 
             for epoch_nr in range(0, nr_epochs):
-                # spo = epoch_nr > nr_epochs / 2 # Do the first half of training through prediction-error based training.
-                spo = True
+
+                # WARM STARTING:
+                spo = epoch_nr > nr_epochs / 2 # Do the first half of training through prediction-error based training.
+                # spo = True # Disables warm starting
 
                 inputValues = []
                 for item in instance:
@@ -80,6 +82,7 @@ def run():
                 # FIXME: we make all predictions at once for now! This gives a dependency on order and on the amount of predictions to be made.
                 inputTensor = torch.FloatTensor(inputValues)
                 predictions = model(inputTensor) # The estimated values array
+                print(predictions)
                 predictedValues = tensorToRoundedInt(predictions)
 
                 # SPO+ loss
@@ -100,14 +103,13 @@ def run():
                             if p.grad is not None:
                                 new_grad = p.grad * deltaL
                                 p.grad.copy_(new_grad)
-
-                    # torch.nn.utils.clip_grad_norm_(model.parameters(), 1) # gradient clipping
-
                     optimizer.step()
 
                     # Write the SPO loss for this epoch
                     predictedScheduleCostOnActual = evaluate_assignment_on_true_values(trueValues, solvedForPredicted["assignments"])
-                    loss = optimalCost - predictedScheduleCostOnActual # Since we're maximizing this is the cost of the assignment through predictions vs the optimal given the exact values.
+
+                    # We're maximizing
+                    loss = optimalCost - predictedScheduleCostOnActual 
                     writeXY(epoch_nr, loss)
 
                 # MSE loss
