@@ -1,5 +1,4 @@
 import torch
-from torch.autograd import Variable
 
 class LinearRegression(torch.nn.Module):
     def __init__(self, inputSize, outputSize):

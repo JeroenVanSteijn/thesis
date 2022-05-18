@@ -12,7 +12,6 @@ from matplotlib.pyplot import (
 def run():
     dirs = os.listdir("results")
     last_dir = max(dirs)
-    print(last_dir)
     instances = os.listdir("results/" + last_dir)
     figure()
     for instance in instances:
