@@ -20,6 +20,6 @@ X_1gtest = X_1gtest[2880:,:]
 weights = [data['weights'].tolist()]
 weights = np.array(weights)
 
-clf = SGD_SPO_dp_lr( weights=weights, epochs=35, optimizer= optim.Adam, capacity =[90],store_result =True,verbose=True)
+clf = SGD_SPO_dp_lr( weights=weights, epochs=10, optimizer= optim.Adam, capacity =[60],store_result =True,verbose=True, plotting=True)
 pdf = clf.fit(X_1gtrain,y_train,X_1gvalidation,y_validation,X_1gtest,y_test)
 print(pdf.head())

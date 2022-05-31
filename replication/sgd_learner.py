@@ -227,6 +227,7 @@ def test_fwd(model, criterion, trch_X, trch_y, n_items, capacity, knaps_sol,weig
     regret_full   = np.zeros(n_knap)
     cf_list =[]
     time =0 
+    
     # I should probably just slice the trch_y and preds arrays and feed it like that...
     for kn_nr in range(n_knap):
         V_true = get_profits(trch_y, kn_nr, n_items)
@@ -238,18 +239,12 @@ def test_fwd(model, criterion, trch_X, trch_y, n_items, capacity, knaps_sol,weig
         if not relaxation:
             cf = confusion_matrix(assignments_true, assignments_pred,labels=[0,1])
             cf_list.append(cf)
-        #sol_true = get_kn_indicators(V_true, capacity, weights=weights)
-        #sol_pred = get_kn_indicators(V_pred, capacity, weights=weights)
-        #regret_smooth[kn_nr] = sum(V_true*(sol_true - sol_pred))
-        #regret_full[kn_nr],cf = regret_knapsack([V_true], [V_pred], weights, capacity,assignments=, relaxation=relaxation)
         
         time+=t
     
     info['nonzero_regrsm'] = sum(regret_smooth != 0)
     info['nonzero_regrfl'] = sum(regret_full != 0)
-    #info['regret_smooth'] = np.average(regret_smooth)
     info['regret_full'] = np.median(regret_full)
-    #info['confusion_matrix'] = np.sum(np.stack(cf_list),axis=0).ravel()
     if not relaxation:
         tn, fp, fn, tp = np.sum(np.stack(cf_list),axis=0).ravel()
         info['tn'],info['fp'],info['fn'],info['tp'] =(tn,fp,fn,tp)
