@@ -72,8 +72,8 @@ def run():
             for epoch_nr in range(0, nr_epochs):
 
                 # WARM STARTING:
-                spo = epoch_nr > nr_epochs / 2 # Do the first half of training through prediction-error based training.
-                # spo = True # Disables warm starting
+                # spo = epoch_nr > nr_epochs / 2 # Do the first half of training through prediction-error based training.
+                spo = True # Disables warm starting
 
                 inputValues = []
                 for item in instance:
@@ -82,7 +82,6 @@ def run():
                 # FIXME: we make all predictions at once for now! This gives a dependency on order and on the amount of predictions to be made.
                 inputTensor = torch.FloatTensor(inputValues)
                 predictions = model(inputTensor) # The estimated values array
-                print(predictions)
                 predictedValues = tensorToRoundedInt(predictions)
 
                 # SPO+ loss
@@ -97,12 +96,10 @@ def run():
                     deltaL = optimalCost - vTwoPredMinActual
 
                     optimizer.zero_grad()
-                    predictions.backward(torch.Tensor([1,1,1,1,1]))
-                    with torch.no_grad():
-                        for p in model.parameters():
-                            if p.grad is not None:
-                                new_grad = p.grad * deltaL
-                                p.grad.copy_(new_grad)
+
+                    grad = deltaL * torch.ones(5)
+
+                    predictions.backward(gradient=grad)
                     optimizer.step()
 
                     # Write the SPO loss for this epoch
