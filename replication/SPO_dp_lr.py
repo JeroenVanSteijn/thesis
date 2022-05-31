@@ -39,7 +39,6 @@ class SGD_SPO_dp_lr:
         self.time = 0
 
     def fit(self, x_train, y_train,x_validation=None,y_validation=None,x_test=None,y_test=None):
-        qids = np.array(x_train[:,0], dtype=int) # qid column
         x_train = x_train[:,1:] # without group ID
         validation = (x_validation is not None) and (y_validation is not None)
         test = (x_test is not None) and (y_test is not None)
@@ -250,7 +249,6 @@ class SGD_SPO_dp_lr:
                 for key, value in d.items():
                     dd[key].append(value)
             df = pd.DataFrame.from_dict(dd)
-            #self.logger.info('Completion Time %s \n' %str(datetime.datetime.now()) )
             logging.info('Completion Time %s \n' %str(datetime.datetime.now()) )
             return df
 
@@ -287,7 +285,6 @@ class SGD_SPO_dp_lr:
         return np.array(pred)
 
     def test_score(self,x_test,y_test,relaxation=False):
-        qids = np.array(x_test[:,0],dtype=int)
         x_test = x_test[:,1:] # drop qid column
         # scale data?
         if self.doScale:
@@ -556,13 +553,11 @@ class Pytorch_regression:
                 for key, value in d.items():
                     dd[key].append(value)
             df = pd.DataFrame.from_dict(dd)
-            #self.logger.info('Completion Time %s \n' %str(datetime.datetime.now()) )
             logging.info('Completion Time %s \n' %str(datetime.datetime.now()) )
             return df
 
 
     def predict(self, x_test):
-        qids = np.array(x_test[:,0], dtype=int) # qid column
         x_test = x_test[:,1:] # drop qid column
         
         # scale data?
@@ -594,7 +589,6 @@ class Pytorch_regression:
         return np.array(pred)
 
     def test_score(self,x_test,y_test):
-        qids = np.array(x_test[:,0],dtype=int)
         x_test = x_test[:,1:] # drop qid column
         # scale data?
         if self.doScale:
@@ -602,17 +596,10 @@ class Pytorch_regression:
         trch_X = torch.from_numpy(x_test).float()
         trch_y = torch.from_numpy(np.array([y_test]).T).float()
         n_items = self.n_items
-        n_knapsacks = len(trch_X)//n_items
         capacity = self.capacity
         
         dict_test = test_fwd(self.model, self.criterion, trch_X, trch_y, n_items, capacity, weights=self.weights)
         return {"loss":dict_test['loss'].item(),"regret":dict_test['regret_full'],"tn": dict_test['tn'],"tp":dict_test['tp'],"fp":dict_test['fp'],"fn":dict_test['fn']}
-
-
-    # not implemented (should be selective or not?)
-    def score(self, attributes, targets):
-        return -1
-
     
     def get_params(self, deep):
         return {'capacity': self.capacity,
