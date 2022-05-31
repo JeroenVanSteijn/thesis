@@ -1,10 +1,7 @@
-import math
 import random
 import numpy as np
-import matplotlib.pyplot as plt
 import pandas as pd
 from sklearn import preprocessing
-from sklearn.metrics import confusion_matrix
 import torch
 from torch import nn, optim
 from torch.autograd import Variable
@@ -12,7 +9,6 @@ from get_energy import get_energy
 from sgd_learner import *
 import logging 
 import datetime
-import time
 from collections import defaultdict
 class SGD_SPO_dp_lr:
     def __init__(self, capacity=None, weights=None, epochs=2, doScale= True, early_stopping= False,
