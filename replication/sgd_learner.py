@@ -1,11 +1,8 @@
-import math
-import random
 import numpy as np
 import matplotlib.pyplot as plt
 import pandas as pd
-from sklearn import preprocessing
 import torch
-from torch import nn, optim
+from torch import nn
 from torch.autograd import Variable
 from KnapsackSolving import *
 from operator import itemgetter
@@ -13,9 +10,9 @@ import itertools
 from multiprocessing.pool import ThreadPool
 from sklearn.metrics import confusion_matrix
 from collections import defaultdict
-import sys
 
 from EnergyCost.ICON import *
+
 class LinearRegression(nn.Module):
     def __init__(self, dim_in, dim_out):
         super().__init__()
