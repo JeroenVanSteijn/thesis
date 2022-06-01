@@ -5,7 +5,6 @@ from sklearn import preprocessing
 import torch
 from torch import nn, optim
 from torch.autograd import Variable
-from get_energy import get_energy
 from sgd_learner import *
 import logging
 import datetime

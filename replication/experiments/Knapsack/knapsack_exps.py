@@ -9,7 +9,7 @@ from torch import optim
 formatter = "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
 logging.basicConfig(filename="weighted_QPTL.log", level=logging.INFO, format=formatter)
 
-data = np.load("../../Data.npz")
+data = np.load("../../knapsackData.npz")
 X_1gtrain = data["X_1gtrain"]
 X_1gtest = data["X_1gtest"]
 y_train = data["y_train"]

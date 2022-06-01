@@ -1,18 +1,9 @@
 import numpy as np
-import matplotlib.pyplot as plt
-import pandas as pd
 import torch
 from torch import nn
 from torch.autograd import Variable
 from KnapsackSolving import *
-from operator import itemgetter
-import itertools
-from multiprocessing.pool import ThreadPool
 from sklearn.metrics import confusion_matrix
-from collections import defaultdict
-
-from EnergyCost.ICON import *
-
 
 class LinearRegression(nn.Module):
     def __init__(self, dim_in, dim_out):
@@ -22,88 +13,6 @@ class LinearRegression(nn.Module):
     def forward(self, x):
         out = self.linear(x)
         return out
-
-
-class GridRegression(nn.Module):
-    def __init__(self, dim_in, dim_out):
-        super().__init__()
-        self.linear = nn.Linear(dim_in, dim_out)  # input and output is 1 dimension
-        self.relu = nn.ReLU()
-
-    def forward(self, x):
-        out = self.relu((self.linear(x)))
-        return out
-
-
-class LogitRegression(nn.Module):
-    def __init__(self, dim_in, num_classes):
-        super().__init__()
-        self.linear = nn.Linear(dim_in, num_classes)  # input and output is 1 dimension
-        self.softmax = nn.Softmax()
-
-    def forward(self, x):
-        out1 = self.linear(x)
-        out2 = self.softmax(out1)
-        return out2
-
-    def take_outY(self, x):
-        self.train(False)
-        return self.linear(x)
-
-
-def shortest_path(V_pred, height=3, width=3):
-    import networkx as nx
-
-    V_pred = np.where(V_pred < 0, 0, V_pred)
-
-    def create_graph(height, width):
-        # G = nx.Graph()
-        G = nx.DiGraph()
-        G.add_nodes_from(
-            [str(i) + "," + str(j) for i in range(height + 1) for j in range(width + 1)]
-        )
-        return G
-
-    def add_weight(G, L, height, width):
-        # G is the directed graph L is the the list of weights
-        t = 0
-        d = {}
-        for i in range(height + 1):
-            for j in range(width + 1):
-                if i < width:
-                    # G.add_weighted_edges_from([( str(i)+","+str(j),str(i+1)+","+str(j) ,L[t])])
-                    G.add_edge(
-                        str(i) + "," + str(j), str(i + 1) + "," + str(j), weight=L[t]
-                    )
-                    d[str(i) + "," + str(j), str(i + 1) + "," + str(j)] = t
-                    # d[str(i+1)+","+str(j),str(i)+","+str(j)]= t
-                    t += 1
-                if j < height:
-                    # G.add_weighted_edges_from([( str(i)+","+str(j),str(i)+","+str(j+1) ,L[t])])
-                    G.add_edge(
-                        str(i) + "," + str(j), str(i) + "," + str(j + 1), weight=L[t]
-                    )
-                    d[str(i) + "," + str(j), str(i) + "," + str(j + 1)] = t
-                    # d[str(i)+","+str(j+1), str(i)+","+str(j)]= t
-                    t += 1
-        return G, d
-
-    def path_distance(G, path):
-        labels = nx.get_edge_attributes(G, "weight")
-        dist = 0
-        for l in range(len(path) - 1):
-            dist += labels[(path[l], path[l + 1])]
-        return dist
-
-    H = create_graph(height, width)
-    H, dt = add_weight(H, V_pred, height, width)
-    sp = nx.bellman_ford_path(H, "0,0", str(height) + "," + str(width))
-    # sp =  nx.dijkstra_path (H,"0,0",str(height)+","+str(width) )
-    ret = np.zeros(V_pred.shape[0])
-    for i in range(len(sp) - 1):
-        ret[dt[sp[i], sp[i + 1]]] = 1
-    return ret
-
 
 def get_kn_indicators(
     V_pred, c, weights=None, use_dp=True, relaxation=False, warmstart=None
@@ -164,24 +73,15 @@ def get_kn_indicators(
     ret[V_pred <= 0] = 0
     return ret
 
-
 def get_data(trch, kn_nr, n_items):
     kn_start = kn_nr * n_items
     kn_stop = kn_start + n_items
     return trch[kn_start:kn_stop]
 
-
-def get_data_ICON(trch, kn_nr, n_items):
-    kn_start = kn_nr * n_items
-    kn_stop = kn_start + n_items + 1
-    return trch[kn_start:kn_stop]
-
-
 def get_profits(trch_y, kn_nr, n_items):
     kn_start = kn_nr * n_items
     kn_stop = kn_start + n_items
     return trch_y[kn_start:kn_stop].data.numpy().T[0]
-
 
 def get_profits_pred(model, trch_X, kn_nr, n_items):
     kn_start = kn_nr * n_items
@@ -191,23 +91,6 @@ def get_profits_pred(model, trch_X, kn_nr, n_items):
         V_pred = model(Variable(trch_X[kn_start:kn_stop]))
     model.train()
     return V_pred.data.numpy().T[0]
-
-
-def get_profits_ICON(trch_y, kn_nr, n_items):
-    kn_start = kn_nr * n_items
-    kn_stop = kn_start + n_items + 1
-    return trch_y[kn_start:kn_stop].data.numpy().T[0]
-
-
-def get_profits_pred_ICON(model, trch_X, kn_nr, n_items):
-    kn_start = kn_nr * n_items
-    kn_stop = kn_start + n_items + 1
-    model.eval()
-    with torch.no_grad():
-        V_pred = model(Variable(trch_X[kn_start:kn_stop]))
-    model.train()
-    return V_pred.data.numpy().T[0]
-
 
 def train_fwdbwd_grad(model, optimizer, sub_X_train, sub_y_train, grad):
     inputs = Variable(sub_X_train, requires_grad=True)
@@ -223,28 +106,6 @@ def train_fwdbwd_grad(model, optimizer, sub_X_train, sub_y_train, grad):
     loss.backward(gradient=grad)
 
     optimizer.step()
-
-
-def train_fwdbwd(model, criterion, optimizer, sub_X_train, sub_y_train, mult):
-    inputs = Variable(sub_X_train)
-    target = Variable(sub_y_train)
-    out = model(inputs)
-    # weighted loss...
-    loss = torch.tensor(mult) * criterion(out, target)
-
-    # backward
-    optimizer.zero_grad()
-    loss.backward()
-    optimizer.step()
-
-
-def train_fwdbwd_oneitem(
-    model, criterion, optimizer, trch_X_train, trch_y_train, pos, mult
-):
-    train_fwdbwd(
-        model, criterion, optimizer, trch_X_train[pos], trch_y_train[pos], mult
-    )
-
 
 def test_fwd(
     model,
@@ -300,166 +161,3 @@ def test_fwd(
         info["accuracy"] = None
     info["runtime"] = time
     return info
-
-
-def diffprof(V_pred, index, newvalue, V_true, c, weights=None, use_dp=True):
-    sol = get_kn_indicators(V_pred, c, weights, use_dp)
-    """# shortcut for 'remains in' and 'remains out'
-    if len(V_pred[sol > 0]) != 0:
-        if weights is None:
-            weights = np.ones(V_pred.shape[0])
-        V_val = V_pred/weights
-       
-        minval = min(V_val[sol > 0])
-        oldvalue = V_val[index]
-        print("Min",minval,"Old",oldvalue)
-        if oldvalue > minval and newvalue > minval:
-            # remains in, no change in 'sol'
-            return 0
-        elif oldvalue < minval and newvalue < minval:
-            # remains out, no change in 'sol'
-            return 0
-    """
-    Vnew = np.array(V_pred)
-    Vnew[index] = newvalue
-    sol_new = get_kn_indicators(Vnew, c, weights, use_dp)
-    return sum(V_true * (sol - sol_new))  # difference in obj
-
-
-def diffprof_grid(V_pred, index, newvalue, V_true, height, width):
-    sol = shortest_path(V_pred, height, width)
-    Vnew = np.array(V_pred)
-    Vnew[index] = newvalue
-    sol_new = shortest_path(Vnew, height, width)
-    return sum(V_true * (sol - sol_new))  # difference in obj
-
-
-def knapsack_value(V, sol, **kw):
-    return sum(V * sol)
-
-
-class grid_search:
-    def __init__(
-        self, clf, fixed_parameter, variable_parameter, by, max_epochs=10, n_iter=10
-    ):
-        self.clf = clf
-        self.fixed_parameter = fixed_parameter
-        self.variable_parameter = variable_parameter
-        self.by = by
-        self.n_iter = n_iter
-        self.max_epochs = max_epochs
-
-    def fit(self, X_train, y_train, X_val, y_val):
-        self.X_train = X_train
-        self.y_train = y_train
-        by = self.by
-
-        def iterate_values(S):
-            keys, values = zip(*S.items())
-            L = []
-
-            for row in itertools.product(*values):
-                L.append(dict(zip(keys, row)))
-            return L
-
-        def fit_func(kwargs):
-            foo = self.clf(**kwargs)
-            df = pd.DataFrame()
-            for i in range(self.n_iter):
-                scr = foo.fit(X_train, y_train, X_val, y_val)
-                df = pd.concat([df, scr])
-            df = df.groupby(["Epoch"], as_index=False).mean()
-            return df[by].min(), df["Epoch"][df[by].idxmin()]
-
-        fixed = {}
-        for k, v in self.fixed_parameter.items():
-            fixed[k] = [v]
-        var = self.variable_parameter
-        z = {**fixed, **var}
-        z["epochs"] = [self.max_epochs]
-        combinations = iterate_values(z)
-        pool = ThreadPool(len(combinations))
-        results = pool.map(fit_func, combinations)
-
-        pool.close()
-        pool.join()
-
-        mean_scr = [i[0] for i in results]
-        epochs = [i[1] for i in results]
-        index = min(enumerate(mean_scr), key=itemgetter(1))[0]
-        params = combinations[index]
-        params["epochs"] = epochs[index]
-        params["early_stopping"] = False
-        self.fit_result = {
-            "params": combinations,
-            "score": results,
-            "optimal_parameter": params,
-        }
-        return dict((k, params[k]) for k in var.keys())
-
-    def test_score(self, X_test, y_test):
-        X_train = self.X_train
-        y_train = self.y_train
-
-        def scr_func(kwargs):
-            foo = self.clf(**kwargs)
-            foo.fit(X_train, y_train)
-            train_scr = foo.test_score(X_train, y_train)
-            test_scr = foo.test_score(X_test, y_test)
-            return [
-                train_scr["regret"],
-                train_scr["loss"],
-                test_scr["regret"],
-                test_scr["loss"],
-            ]
-
-        params = self.fit_result["optimal_parameter"]
-        print("Optimum parameter:", params)
-        combinations = [params for i in range(self.n_iter)]
-        pool = ThreadPool(self.n_iter)
-        results = pool.map(scr_func, combinations)
-        mean_rslt = np.mean(np.array(results), axis=0)
-        return {
-            "train_regret": mean_rslt[0],
-            "train_loss": mean_rslt[1],
-            "test_regret": mean_rslt[2],
-            "test_loss": mean_rslt[3],
-        }
-
-
-def ICON_solution(
-    y_pred,
-    y_test,
-    relax,
-    presolve,
-    reset,
-    n_items=288,
-    solver=Gurobi_ICON,
-    method=-1,
-    **param
-):
-    clf = solver(relax=relax, method=method, reset=reset, presolve=presolve, **param)
-    clf.make_model()
-    sol_hist = []
-
-    n_knap = len(y_pred) // n_items
-    result = []
-    for kn_nr in range(n_knap):
-        kn_start = kn_nr * n_items
-        kn_stop = kn_start + n_items
-        V = y_pred[kn_start:kn_stop]
-        V_test = y_test[kn_start:kn_stop]
-        logging.info("Oracle called")
-        sol, _ = clf.solve_model(V)
-        logging.info("Oracle returned")
-        sol_hist.append(sol)
-        if len(sol_hist) > 50:
-            _ = sol_hist.pop(0)
-
-        opt = knapsack_value(V_test, sol)
-        result.append({"instance": kn_nr, "optimal_value": opt})
-    dd = defaultdict(list)
-    for d in result:
-        for key, value in d.items():
-            dd[key].append(value)
-    return dd
