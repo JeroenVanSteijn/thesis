@@ -1,15 +1,15 @@
 import random
 import numpy as np
 import pandas as pd
+import matplotlib.pyplot as plt
 from sklearn import preprocessing
 import torch
 from torch import nn, optim
 from torch.autograd import Variable
-from learner import *
+from learner import LinearRegression, get_kn_indicators, get_profits, get_profits_pred, train_fwdbwd_grad, test_fwd
 import logging
 import datetime
 from collections import defaultdict
-
 
 class SGD_SPO_dp_lr:
     def __init__(
@@ -18,7 +18,6 @@ class SGD_SPO_dp_lr:
         weights=None,
         epochs=2,
         doScale=True,
-        early_stopping=False,
         n_items=48,
         model=None,
         verbose=False,
@@ -46,7 +45,6 @@ class SGD_SPO_dp_lr:
         self.optimizer = optimizer
         self.use_dp = use_dp
         self.degree = degree
-        self.early_stopping = early_stopping
         self.use_relaxation = use_relaxation
         self.validation_relax = validation_relax
         self.store_result = store_result
@@ -68,8 +66,6 @@ class SGD_SPO_dp_lr:
         x_train = x_train[:, 1:]  # without group ID
         validation = (x_validation is not None) and (y_validation is not None)
         test = (x_test is not None) and (y_test is not None)
-        if self.early_stopping:
-            validation_rslt = []
 
         # scale data?
         if self.doScale:
@@ -214,11 +210,6 @@ class SGD_SPO_dp_lr:
                     grad = reg * grad
                 self.time += t
 
-                # for each item
-                """for idx in range(len(grad)):
-                    pos = idx + (kn_nr*n_items) # indices in train array
-                    train_fwdbwd_grad(self.model, optimizer, trch_X_train[pos], trch_y_train[pos], grad[idx])
-                """
                 ### what if for the whole 48 items at a time
                 kn_start = kn_nr * n_items
                 kn_stop = kn_start + n_items
@@ -345,36 +336,7 @@ class SGD_SPO_dp_lr:
                                     )
                                 )
 
-            if self.early_stopping:
-                dict_train = test_fwd(
-                    self.model,
-                    criterion,
-                    trch_X_train,
-                    trch_y_train,
-                    n_items,
-                    capacity,
-                    weights=self.weights,
-                )
-                dict_validation = test_fwd(
-                    self.model,
-                    criterion,
-                    trch_X_validation,
-                    trch_y_validation,
-                    n_items,
-                    capacity,
-                    weights=self.weights,
-                )
-                validation_rslt.append(
-                    [
-                        epoch,
-                        dict_train["loss"].item(),
-                        dict_train["regret_full"],
-                        dict_validation["loss"].item(),
-                        dict_validation["regret_full"],
-                    ]
-                )
         if self.plotting:
-            import matplotlib.pyplot as plt
 
             if validation:
                 plt.subplot(3, 1, 1)
@@ -420,17 +382,6 @@ class SGD_SPO_dp_lr:
                 plt.ylabel("Accuracy")
                 plt.show()
 
-        if self.early_stopping:
-            return pd.DataFrame(
-                validation_rslt,
-                columns=[
-                    "Epoch",
-                    "train_loss",
-                    "train_regret",
-                    "validation_loss",
-                    "validation_regret",
-                ],
-            )
         if self.store_result:
             dd = defaultdict(list)
             for d in test_result:

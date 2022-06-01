@@ -2,7 +2,7 @@ import numpy as np
 import torch
 from torch import nn
 from torch.autograd import Variable
-from solving import *
+from solving import solveKnapsackProblem, solveKnapsackProblemRelaxation
 from sklearn.metrics import confusion_matrix
 
 class LinearRegression(nn.Module):
