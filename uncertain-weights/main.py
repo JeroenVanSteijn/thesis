@@ -1,4 +1,5 @@
 import logging
+import random
 from torch import optim
 import numpy as np
 from SPO_learner import SGD_SPO_dp_lr
@@ -21,10 +22,13 @@ y_validation = y_test[0:2880] # [] floats, length 2880 -> this is the true WEIGH
 y_test = y_test[2880:] # [] floats, length 8496 -> this is the true WEIGHT value of the item. Values between 1 and 50
 X_1gtest = X_1gtest[2880:, :] # [ 611 0 6 27 7 99 3083.99 53.64 606.13] array of [int int int int int int float float float], 6x int 3x float -> these are the predictive features per item.
 
-values = [50, 30, 30, 50, 50, 70, 70, 30, 70, 70, 30, 30, 50, 30, 70, 30, 70, 70, 50, 50, 30, 50, 50, 30, 70, 70, 30, 70, 50, 50, 70, 30, 70, 30, 30, 50, 70, 50, 30, 50, 30, 70, 50, 70, 50, 50, 30, 70]
+
+random_values = []
+for i in range(0, 48):
+    random_values.append(random.randint(1,70))
 
 clf = SGD_SPO_dp_lr(
-    values=values,
+    values=random_values,
     epochs=10,
     optimizer=optim.Adam,
     capacity=[60],

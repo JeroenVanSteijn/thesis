@@ -5,8 +5,7 @@ import matplotlib.pyplot as plt
 from sklearn import preprocessing
 import torch
 from torch import nn, optim
-from torch.autograd import Variable
-from learner import LinearRegression, get_kn_indicators, get_profits, get_profits_pred, train_fwdbwd_grad, test_fwd
+from learner import LinearRegression, get_kn_indicators, get_weights, get_weights_pred, train_fwdbwd_grad, test_fwd, repair_infeasible_kn_indicators
 import logging
 import datetime
 from collections import defaultdict
@@ -24,7 +23,6 @@ class SGD_SPO_dp_lr:
         plotting=False,
         return_regret=False,
         validation_relax=False,
-        degree=1,
         optimizer=optim.SGD,
         store_result=False,
         **hyperparam
@@ -41,7 +39,6 @@ class SGD_SPO_dp_lr:
         self.plotting = plotting
         self.return_regret = return_regret
         self.optimizer = optimizer
-        self.degree = degree
         self.validation_relax = validation_relax
         self.store_result = store_result
 
@@ -101,13 +98,14 @@ class SGD_SPO_dp_lr:
 
         # prepping
         knaps_V_true = [
-            get_profits(trch_y_train, kn_nr, n_items) for kn_nr in range(n_knapsacks)
+            get_weights(trch_y_train, kn_nr, n_items) for kn_nr in range(n_knapsacks)
         ]
         knaps_sol = [
             get_kn_indicators(
                 V_true,
                 capacity,
                 values=self.values,
+                true_weights=V_true,
             )
             for V_true in knaps_V_true
         ]
@@ -117,7 +115,7 @@ class SGD_SPO_dp_lr:
         if validation:
             n_knapsacks_validation = len(trch_X_validation) // n_items
             knaps_V_true_validation = [
-                get_profits(trch_y_validation, kn_nr, n_items)
+                get_weights(trch_y_validation, kn_nr, n_items)
                 for kn_nr in range(n_knapsacks_validation)
             ]
             knaps_sol_validation = [
@@ -125,6 +123,7 @@ class SGD_SPO_dp_lr:
                     V_true,
                     capacity,
                     values=self.values,
+                    true_weights=V_true,
                 )
                 for V_true in knaps_V_true_validation
             ]
@@ -134,7 +133,7 @@ class SGD_SPO_dp_lr:
         if test:
             n_knapsacks_test = len(trch_X_test) // n_items
             knaps_V_true_test = [
-                get_profits(trch_y_test, kn_nr, n_items)
+                get_weights(trch_y_test, kn_nr, n_items)
                 for kn_nr in range(n_knapsacks_test)
             ]
             knaps_sol_test = [
@@ -142,6 +141,7 @@ class SGD_SPO_dp_lr:
                     V_true,
                     capacity,
                     values=self.values,
+                    true_weights=V_true,
                 )
                 for V_true in knaps_V_true_test
             ]
@@ -175,25 +175,19 @@ class SGD_SPO_dp_lr:
                 sol_true = knaps_sol[kn_nr][0]
 
                 # the true-shifted predictions
-                V_pred = get_profits_pred(self.model, trch_X_train, kn_nr, n_items)
+                V_pred = get_weights_pred(self.model, trch_X_train, kn_nr, n_items)
                 V_spo = 2 * V_pred - V_true
 
                 sol_spo, t = get_kn_indicators(
                     V_spo,
                     capacity,
-                    warmstart=sol_true,
                     values=self.values,
+                    true_weights=V_true,
+                    warmstart=sol_true,
                 )
+
                 grad = sol_spo - sol_true
 
-                if self.degree == 2:
-                    sol_pred, t = get_kn_indicators(
-                        V_pred,
-                        capacity,
-                        values=self.values,
-                    )
-                    reg = sum((sol_true - sol_pred) * V_true)
-                    grad = reg * grad
                 self.time += t
 
                 ### what if for the whole 48 items at a time
