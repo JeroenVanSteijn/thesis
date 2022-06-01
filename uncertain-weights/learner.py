@@ -15,11 +15,16 @@ class LinearRegression(nn.Module):
         return out
 
 def get_kn_indicators(
-    V_pred, c, values, true_weights, warmstart=None
+    V_pred, c, values, true_weights, warmstart=None, logging=False
 ):
     solution = solveKnapsackProblem([V_pred.astype(int).tolist()], values, c, warmstart=warmstart)
     assignments = np.asarray(solution["assignments"])
     repaired_assignments = repair_infeasible_kn_indicators(assignments, true_weights, c)
+    if logging:
+        print("Assignments before repair:")
+        print(assignments)
+        print("Assignments after repair:")
+        print(repaired_assignments)
     return np.asarray(repaired_assignments), solution["runtime"]
 
 # The SPO solution may be infeasible when evaluated on the true weights. We remove any objects that do not fit anymore.
@@ -61,6 +66,7 @@ def get_weights_pred(model, trch_X, kn_nr, n_items):
     model.train()
     return V_pred.data.numpy().T[0]
 
+# Test fwdbwd grad is a training mechanism. It trains the model based on an earlier calculed gradient.
 def train_fwdbwd_grad(model, optimizer, sub_X_train, sub_y_train, grad):
     inputs = Variable(sub_X_train, requires_grad=True)
     out = model(inputs)
@@ -74,6 +80,7 @@ def train_fwdbwd_grad(model, optimizer, sub_X_train, sub_y_train, grad):
 
     optimizer.step()
 
+# Test fwd is an evaluation mechanism. It executes the model without training.
 def test_fwd(
     model,
     criterion,

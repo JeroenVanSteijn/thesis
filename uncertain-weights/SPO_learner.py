@@ -169,6 +169,7 @@ class SGD_SPO_dp_lr:
 
             random.shuffle(knapsack_nrs)  # randomly shuffle order of training
             cnt = 0
+            enable_logging = cnt % 20 == 0
             for kn_nr in knapsack_nrs:
 
                 V_true = knaps_V_true[kn_nr]
@@ -178,15 +179,28 @@ class SGD_SPO_dp_lr:
                 V_pred = get_weights_pred(self.model, trch_X_train, kn_nr, n_items)
                 V_spo = 2 * V_pred - V_true
 
+                if enable_logging:
+                    print("predicted weights:")
+                    print(V_pred)
+                    print("true weights:")
+                    print(V_true)
+                    print("SPO weights:")
+                    print(V_spo)
+
                 sol_spo, t = get_kn_indicators(
                     V_spo,
                     capacity,
                     values=self.values,
                     true_weights=V_true,
                     warmstart=sol_true,
+                    logging=enable_logging
                 )
 
                 grad = sol_spo - sol_true
+
+                if enable_logging:
+                    print("spo_grad:")
+                    print(grad)
 
                 self.time += t
 
