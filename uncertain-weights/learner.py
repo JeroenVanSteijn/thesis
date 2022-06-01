@@ -32,7 +32,7 @@ def repair_infeasible_kn_indicators(
     for index, element in enumerate(assignment):
         if element == 1:
             new_total = total + true_weights[index]
-            if new_total < capacity:
+            if new_total <= capacity:
                 total = new_total
                 new_assignments.append(1)
             else:
@@ -106,9 +106,9 @@ def test_fwd(
         assignments_pred, t = get_kn_indicators(
             V_pred, c=capacity, values=values, true_weights=V_true
         )
-
         assignments_true = knaps_sol[kn_nr][0]
-        regret_full[kn_nr] = np.sum(V_true * (assignments_true - assignments_pred))
+
+        regret_full[kn_nr] = np.sum(values * (assignments_true - assignments_pred))
 
         cf = confusion_matrix(assignments_true, assignments_pred, labels=[0, 1])
         cf_list.append(cf)
