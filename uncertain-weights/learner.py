@@ -15,9 +15,9 @@ class LinearRegression(nn.Module):
         return out
 
 def get_kn_indicators(
-    V_pred, c, weights=None, warmstart=None
+    V_pred, c, values, warmstart=None
 ):
-    solution = solveKnapsackProblem(V_pred, weights, c, warmstart=warmstart)
+    solution = solveKnapsackProblem([V_pred.astype(int).tolist()], values, c, warmstart=warmstart)
     return np.asarray(solution["assignments"]), solution["runtime"]
 
 def get_data(trch, kn_nr, n_items):
@@ -60,7 +60,7 @@ def test_fwd(
     n_items,
     capacity,
     knaps_sol,
-    weights=None
+    values
 ):
     info = dict()
     model.eval()
@@ -83,7 +83,7 @@ def test_fwd(
         V_true = get_profits(trch_y, kn_nr, n_items)
         V_pred = get_profits(V_preds, kn_nr, n_items)
         assignments_pred, t = get_kn_indicators(
-            V_pred, c=capacity, weights=weights
+            V_pred, c=capacity, values=values
         )
 
         assignments_true = knaps_sol[kn_nr][0]

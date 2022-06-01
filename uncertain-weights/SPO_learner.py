@@ -15,7 +15,7 @@ class SGD_SPO_dp_lr:
     def __init__(
         self,
         capacity=None,
-        weights=None,
+        values=None,
         epochs=2,
         doScale=True,
         n_items=48,
@@ -31,7 +31,7 @@ class SGD_SPO_dp_lr:
     ):
         self.n_items = n_items
         self.capacity = capacity
-        self.weights = weights
+        self.values = values
 
         self.hyperparam = hyperparam
         self.epochs = epochs
@@ -107,7 +107,7 @@ class SGD_SPO_dp_lr:
             get_kn_indicators(
                 V_true,
                 capacity,
-                weights=self.weights,
+                values=self.values,
             )
             for V_true in knaps_V_true
         ]
@@ -124,7 +124,7 @@ class SGD_SPO_dp_lr:
                 get_kn_indicators(
                     V_true,
                     capacity,
-                    weights=self.weights,
+                    values=self.values,
                 )
                 for V_true in knaps_V_true_validation
             ]
@@ -141,7 +141,7 @@ class SGD_SPO_dp_lr:
                 get_kn_indicators(
                     V_true,
                     capacity,
-                    weights=self.weights,
+                    values=self.values,
                 )
                 for V_true in knaps_V_true_test
             ]
@@ -182,7 +182,7 @@ class SGD_SPO_dp_lr:
                     V_spo,
                     capacity,
                     warmstart=sol_true,
-                    weights=self.weights,
+                    values=self.values,
                 )
                 grad = sol_spo - sol_true
 
@@ -190,7 +190,7 @@ class SGD_SPO_dp_lr:
                     sol_pred, t = get_kn_indicators(
                         V_pred,
                         capacity,
-                        weights=self.weights,
+                        values=self.values,
                     )
                     reg = sum((sol_true - sol_pred) * V_true)
                     grad = reg * grad
@@ -224,7 +224,7 @@ class SGD_SPO_dp_lr:
                             n_items,
                             capacity,
                             knaps_sol,
-                            weights=self.weights,
+                            values=self.values,
                         )
                         if validation:
                             dict_validation = test_fwd(
@@ -235,7 +235,7 @@ class SGD_SPO_dp_lr:
                                 n_items,
                                 capacity,
                                 knaps_sol_validation,
-                                weights=self.weights,
+                                values=self.values,
                             )
                         if test:
                             dict_test = test_fwd(
@@ -246,7 +246,7 @@ class SGD_SPO_dp_lr:
                                 n_items,
                                 capacity,
                                 knaps_sol_test,
-                                weights=self.weights,
+                                values=self.values,
                             )
                         self.time += dict_validation["runtime"]
                         if self.store_result:
