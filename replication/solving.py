@@ -34,7 +34,7 @@ def solveKnapsackGreedily(profits, weights, capacity):
 
 
 def solveKnapsackProblemRelaxation(
-    profits, weights, capacity, warmstart=None, time_limit=None, use_dp=True
+    profits, weights, capacity, warmstart=None
 ):
     profits = [v for v in profits]
     weights = [[w for w in W] for W in weights]
@@ -109,8 +109,6 @@ def solveKnapsackProblem(profits, weights, capacity, warmstart=None):
     except:
         print("SOME EXCEPTION HAPPENED! RETURNING GARBAGE\n")
         val = 0
-        import sys
-
         solution_info = {}
         solution_info["runtime"] = m.Runtime
         solution_info["objective"] = val
