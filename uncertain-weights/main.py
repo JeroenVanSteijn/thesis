@@ -29,7 +29,7 @@ for i in range(0, 48):
 
 clf = SGD_SPO_dp_lr(
     values=random_values,
-    epochs=10,
+    epochs=1000,
     optimizer=optim.Adam,
     capacity=[60],
     store_result=True,

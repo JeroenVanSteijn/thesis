@@ -23,6 +23,7 @@ def get_kn_indicators(
     return np.asarray(repaired_assignments), solution["runtime"]
 
 # The SPO solution may be infeasible when evaluated on the true weights. We remove any objects that do not fit anymore.
+# Note: this may not be learned by SPO! It first selected all elements, and the repair function filters out many of them, but it does not approach any other feasible solution than just picking the first few very quickly...
 def repair_infeasible_kn_indicators(
     assignment, true_weights, capacity
 ):

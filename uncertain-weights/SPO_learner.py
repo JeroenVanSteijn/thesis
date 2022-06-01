@@ -5,7 +5,7 @@ import matplotlib.pyplot as plt
 from sklearn import preprocessing
 import torch
 from torch import nn, optim
-from learner import LinearRegression, get_kn_indicators, get_weights, get_weights_pred, train_fwdbwd_grad, test_fwd, repair_infeasible_kn_indicators
+from learner import LinearRegression, get_kn_indicators, get_weights, get_weights_pred, train_fwdbwd_grad, test_fwd
 import logging
 import datetime
 from collections import defaultdict
