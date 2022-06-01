@@ -23,8 +23,6 @@ class SGD_SPO_dp_lr:
         verbose=False,
         plotting=False,
         return_regret=False,
-        use_dp=True,
-        use_relaxation=False,
         validation_relax=False,
         degree=1,
         optimizer=optim.SGD,
@@ -43,9 +41,7 @@ class SGD_SPO_dp_lr:
         self.plotting = plotting
         self.return_regret = return_regret
         self.optimizer = optimizer
-        self.use_dp = use_dp
         self.degree = degree
-        self.use_relaxation = use_relaxation
         self.validation_relax = validation_relax
         self.store_result = store_result
 
@@ -112,8 +108,6 @@ class SGD_SPO_dp_lr:
                 V_true,
                 capacity,
                 weights=self.weights,
-                use_dp=self.use_dp,
-                relaxation=self.use_relaxation,
             )
             for V_true in knaps_V_true
         ]
@@ -131,8 +125,6 @@ class SGD_SPO_dp_lr:
                     V_true,
                     capacity,
                     weights=self.weights,
-                    use_dp=self.use_dp,
-                    relaxation=self.validation_relax,
                 )
                 for V_true in knaps_V_true_validation
             ]
@@ -150,8 +142,6 @@ class SGD_SPO_dp_lr:
                     V_true,
                     capacity,
                     weights=self.weights,
-                    use_dp=self.use_dp,
-                    relaxation=False,
                 )
                 for V_true in knaps_V_true_test
             ]
@@ -193,8 +183,6 @@ class SGD_SPO_dp_lr:
                     capacity,
                     warmstart=sol_true,
                     weights=self.weights,
-                    use_dp=self.use_dp,
-                    relaxation=self.use_relaxation,
                 )
                 grad = sol_spo - sol_true
 
@@ -203,8 +191,6 @@ class SGD_SPO_dp_lr:
                         V_pred,
                         capacity,
                         weights=self.weights,
-                        use_dp=self.use_dp,
-                        relaxation=self.use_relaxation,
                     )
                     reg = sum((sol_true - sol_pred) * V_true)
                     grad = reg * grad
@@ -238,7 +224,6 @@ class SGD_SPO_dp_lr:
                             n_items,
                             capacity,
                             knaps_sol,
-                            relaxation=self.use_relaxation,
                             weights=self.weights,
                         )
                         if validation:
@@ -250,7 +235,6 @@ class SGD_SPO_dp_lr:
                                 n_items,
                                 capacity,
                                 knaps_sol_validation,
-                                relaxation=self.validation_relax,
                                 weights=self.weights,
                             )
                         if test:
@@ -262,7 +246,6 @@ class SGD_SPO_dp_lr:
                                 n_items,
                                 capacity,
                                 knaps_sol_test,
-                                relaxation=False,
                                 weights=self.weights,
                             )
                         self.time += dict_validation["runtime"]
@@ -390,66 +373,3 @@ class SGD_SPO_dp_lr:
             df = pd.DataFrame.from_dict(dd)
             logging.info("Completion Time %s \n" % str(datetime.datetime.now()))
             return df
-
-    def predict(self, x_test):
-        x_test = x_test[:, 1:]  # drop qid column
-
-        # scale data?
-        if self.doScale:
-            x_test = self.scaler.transform(x_test)
-
-        trch_X = torch.from_numpy(x_test).float()
-        pred = self.model(Variable(trch_X))
-        return pred.data.numpy().T[0]  # as numpy array (transpose)
-
-    def predit_knapsack(self, x_test):
-        x_test = x_test[:, 1:]  # drop qid column
-
-        # scale data?
-        if self.doScale:
-            x_test = self.scaler.transform(x_test)
-
-        trch_X = torch.from_numpy(x_test).float()
-        n_items = self.n_items
-        n_knapsacks = len(trch_X) // n_items
-        capacity = self.capacity
-
-        knapsack_nrs = [x for x in range(n_knapsacks)]
-        pred = []
-        for kn_nr in knapsack_nrs:
-            V_pred = get_profits_pred(self.model, trch_X, kn_nr, n_items)
-            sol_pred = get_kn_indicators(
-                V_pred, capacity, weights=self.weights, use_dp=True
-            )
-            pred.append(sol_pred)
-        return np.array(pred)
-
-    def test_score(self, x_test, y_test, relaxation=False):
-        x_test = x_test[:, 1:]  # drop qid column
-        # scale data?
-        if self.doScale:
-            x_test = self.scaler.transform(x_test)
-        trch_X = torch.from_numpy(x_test).float()
-        trch_y = torch.from_numpy(np.array([y_test]).T).float()
-        n_items = self.n_items
-        capacity = self.capacity
-        criterion = nn.MSELoss()
-
-        dict_test = test_fwd(
-            self.model,
-            criterion,
-            trch_X,
-            trch_y,
-            n_items,
-            capacity,
-            weights=self.weights,
-            relaxation=relaxation,
-        )
-        return {
-            "loss": dict_test["loss"].item(),
-            "regret": dict_test["regret_full"],
-            "tn": dict_test["tn"],
-            "tp": dict_test["tp"],
-            "fp": dict_test["fp"],
-            "fn": dict_test["fn"],
-        }

@@ -2,7 +2,7 @@ import numpy as np
 import torch
 from torch import nn
 from torch.autograd import Variable
-from solving import solveKnapsackProblem, solveKnapsackProblemRelaxation
+from solving import solveKnapsackProblem
 from sklearn.metrics import confusion_matrix
 
 class LinearRegression(nn.Module):
@@ -15,43 +15,10 @@ class LinearRegression(nn.Module):
         return out
 
 def get_kn_indicators(
-    V_pred, c, weights=None, use_dp=True, relaxation=False, warmstart=None
+    V_pred, c, weights=None, warmstart=None
 ):
-    if weights is None:
-        weights = np.ones(V_pred.shape[0])
-    if use_dp:
-        if relaxation:
-            solution = solveKnapsackProblemRelaxation(
-                V_pred, weights, c, warmstart=warmstart
-            )
-        else:
-            solution = solveKnapsackProblem(V_pred, weights, c, warmstart=warmstart)
-        return np.asarray(solution["assignments"]), solution["runtime"]
-
-    ret = np.zeros(V_pred.shape[0])
-
-    # order by profitability
-    V_val = V_pred / weights
-
-    for val in sorted(set(V_val), reverse=True):
-        same_val = V_val == val
-        tot_weight = sum(weights[same_val])
-        if c >= tot_weight:
-            # all in
-            ret[same_val] = 1
-            c = c - tot_weight
-
-        elif c > 0:
-            # equal divide
-            fraction = c / tot_weight
-            ret[same_val] = fraction
-            c = 0
-            break
-        else:
-            break
-        
-    ret[V_pred <= 0] = 0
-    return ret
+    solution = solveKnapsackProblem(V_pred, weights, c, warmstart=warmstart)
+    return np.asarray(solution["assignments"]), solution["runtime"]
 
 def get_data(trch, kn_nr, n_items):
     kn_start = kn_nr * n_items
@@ -93,8 +60,7 @@ def test_fwd(
     n_items,
     capacity,
     knaps_sol,
-    weights=None,
-    relaxation=False,
+    weights=None
 ):
     info = dict()
     model.eval()
@@ -117,25 +83,24 @@ def test_fwd(
         V_true = get_profits(trch_y, kn_nr, n_items)
         V_pred = get_profits(V_preds, kn_nr, n_items)
         assignments_pred, t = get_kn_indicators(
-            V_pred, c=capacity, weights=weights, relaxation=relaxation
+            V_pred, c=capacity, weights=weights
         )
 
         assignments_true = knaps_sol[kn_nr][0]
         regret_full[kn_nr] = np.sum(V_true * (assignments_true - assignments_pred))
-        if not relaxation:
-            cf = confusion_matrix(assignments_true, assignments_pred, labels=[0, 1])
-            cf_list.append(cf)
+
+        cf = confusion_matrix(assignments_true, assignments_pred, labels=[0, 1])
+        cf_list.append(cf)
 
         time += t
 
     info["nonzero_regrsm"] = sum(regret_smooth != 0)
     info["nonzero_regrfl"] = sum(regret_full != 0)
     info["regret_full"] = np.median(regret_full)
-    if not relaxation:
-        tn, fp, fn, tp = np.sum(np.stack(cf_list), axis=0).ravel()
-        info["tn"], info["fp"], info["fn"], info["tp"] = (tn, fp, fn, tp)
-        info["accuracy"] = (tn + tp) / (tn + tp + fn + fp)
-    else:
-        info["accuracy"] = None
+
+    tn, fp, fn, tp = np.sum(np.stack(cf_list), axis=0).ravel()
+    info["tn"], info["fp"], info["fn"], info["tp"] = (tn, fp, fn, tp)
+    info["accuracy"] = (tn + tp) / (tn + tp + fn + fp)
+
     info["runtime"] = time
     return info
