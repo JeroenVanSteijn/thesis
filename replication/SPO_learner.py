@@ -183,8 +183,9 @@ class SGD_SPO_dp_lr:
                     capacity,
                     warmstart=sol_true,
                     weights=self.weights,
-                )
-                grad = sol_spo - sol_true
+                ) # Question -> only 0's?, in all replication?
+
+                grad = sol_spo - sol_true # Question -> can (2 * V_pred - V_true) 0 V_true also be a grad? Not in paper?
 
                 if self.degree == 2:
                     sol_pred, t = get_kn_indicators(
@@ -192,7 +193,7 @@ class SGD_SPO_dp_lr:
                         capacity,
                         weights=self.weights,
                     )
-                    reg = sum((sol_true - sol_pred) * V_true)
+                    reg = sum((sol_true - sol_pred) * V_true) #Question: why not sol_spo - sol_pred??
                     grad = reg * grad
                 self.time += t
 

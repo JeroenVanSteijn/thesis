@@ -19,33 +19,26 @@ def get_kn_indicators(
 ):
     solution = solveKnapsackProblem([V_pred.astype(int).tolist()], values, c, warmstart=warmstart)
     assignments = np.asarray(solution["assignments"])
-    repaired_assignments = repair_infeasible_kn_indicators(assignments, true_weights, c)
-    if logging:
-        print("Assignments before repair:")
-        print(assignments)
-        print("Assignments after repair:")
-        print(repaired_assignments)
-    return np.asarray(repaired_assignments), solution["runtime"]
+    return assignments, solution["runtime"]
 
-# The SPO solution may be infeasible when evaluated on the true weights. We remove any objects that do not fit anymore.
-# Note: this may not be learned by SPO! It first selected all elements, and the repair function filters out many of them, but it does not approach any other feasible solution than just picking the first few very quickly...
-def repair_infeasible_kn_indicators(
-    assignment, true_weights, capacity
-):
+def get_objective_value_penalized_infeasibility(assignments, true_weights, values, capacity):
     capacity = capacity[0]
-    total = 0
-    new_assignments = []
-    for index, element in enumerate(assignment):
+    capacity_used = 0
+    total_value = 0
+    infeasible = False
+
+    for index, element in enumerate(assignments):
         if element == 1:
-            new_total = total + true_weights[index]
+            total_value += values[index]
+
+            new_total = capacity_used + true_weights[index]
             if new_total <= capacity:
-                total = new_total
-                new_assignments.append(1)
+                capacity_used = new_total
             else:
-                new_assignments.append(0)
-        else:
-            new_assignments.append(0)
-    return new_assignments
+                infeasible = True
+                total_value -= values[index] * 2
+    
+    return total_value, infeasible
 
 def get_data(trch, kn_nr, n_items):
     kn_start = kn_nr * n_items
@@ -107,6 +100,8 @@ def test_fwd(
     cf_list = []
     time = 0
 
+    penalized_count = 0
+
     # I should probably just slice the trch_y and preds arrays and feed it like that...
     for kn_nr in range(n_knap):
         V_true = get_weights(trch_y, kn_nr, n_items)
@@ -116,7 +111,12 @@ def test_fwd(
         )
         assignments_true = knaps_sol[kn_nr][0]
 
-        regret_full[kn_nr] = np.sum(values * (assignments_true - assignments_pred))
+        optimal_value = np.sum(values * (assignments_true))
+        achieved_value, was_penalized = get_objective_value_penalized_infeasibility(assignments_pred, V_true, values, capacity)
+
+        if was_penalized:
+            penalized_count = penalized_count + 1 
+        regret_full[kn_nr] = optimal_value - achieved_value
 
         cf = confusion_matrix(assignments_true, assignments_pred, labels=[0, 1])
         cf_list.append(cf)
@@ -125,7 +125,9 @@ def test_fwd(
 
     info["nonzero_regrsm"] = sum(regret_smooth != 0)
     info["nonzero_regrfl"] = sum(regret_full != 0)
+
     info["regret_full"] = np.median(regret_full)
+    info["penalized_count"] = penalized_count
 
     tn, fp, fn, tp = np.sum(np.stack(cf_list), axis=0).ravel()
     info["tn"], info["fp"], info["fn"], info["tp"] = (tn, fp, fn, tp)

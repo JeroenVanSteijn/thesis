@@ -5,7 +5,7 @@ import matplotlib.pyplot as plt
 from sklearn import preprocessing
 import torch
 from torch import nn, optim
-from learner import LinearRegression, get_kn_indicators, get_weights, get_weights_pred, train_fwdbwd_grad, test_fwd
+from learner import LinearRegression, get_kn_indicators, get_objective_value_penalized_infeasibility, get_weights, get_weights_pred, train_fwdbwd_grad, test_fwd
 import logging
 import datetime
 from collections import defaultdict
@@ -169,11 +169,12 @@ class SGD_SPO_dp_lr:
 
             random.shuffle(knapsack_nrs)  # randomly shuffle order of training
             cnt = 0
-            enable_logging = cnt % 20 == 0
+            enable_logging = cnt % 20 == 0 and False
             for kn_nr in knapsack_nrs:
 
                 V_true = knaps_V_true[kn_nr]
                 sol_true = knaps_sol[kn_nr][0]
+                optimal_objective_value = np.sum(sol_true * self.values)
 
                 # the true-shifted predictions
                 V_pred = get_weights_pred(self.model, trch_X_train, kn_nr, n_items)
@@ -187,7 +188,18 @@ class SGD_SPO_dp_lr:
                     print("SPO weights:")
                     print(V_spo)
 
-                sol_spo, t = get_kn_indicators(
+                assignments_pred, t = get_kn_indicators(
+                    V_pred,
+                    capacity,
+                    values=self.values,
+                    true_weights=V_true,
+                    warmstart=sol_true,
+                    logging=enable_logging
+                )
+                # Objective value for theta hat
+                sol_pred, _was_penalized = get_objective_value_penalized_infeasibility(assignments_pred, V_true, self.values, capacity)
+
+                assignments_spo, t = get_kn_indicators(
                     V_spo,
                     capacity,
                     values=self.values,
@@ -195,13 +207,13 @@ class SGD_SPO_dp_lr:
                     warmstart=sol_true,
                     logging=enable_logging
                 )
+                # Objective value for 2 * theta hat - theta
+                sol_spo, _was_penalized = get_objective_value_penalized_infeasibility(assignments_spo, V_true, self.values, capacity)
+                
+                regret = optimal_objective_value - sol_pred
 
-                grad = sol_spo - sol_true
-
-                if enable_logging:
-                    print("spo_grad:")
-                    print(grad)
-
+                grad = regret * (sol_spo - sol_true)
+                
                 self.time += t
 
                 ### what if for the whole 48 items at a time
@@ -305,14 +317,16 @@ class SGD_SPO_dp_lr:
                             if validation:
                                 logger.append((dict_epoch, dict_train, dict_validation))
                                 print(
-                                    "Epoch[{}/{}]::{}, loss(train): {:.6f}, regret(train): {:.2f}, loss(validation): {:.6f}, regret(validation): {:.2f}".format(
+                                    "Epoch[{}/{}]::{}, loss(train): {:.6f}, regret(train): {:.2f},  penalized(train): {:.2f}, loss(validation): {:.6f}, regret(validation): {:.2f}, penalized(train): {:.2f}".format(
                                         epoch + 1,
                                         num_epochs,
                                         cnt,
                                         dict_train["loss"],
                                         dict_train["regret_full"],
+                                        dict_train["penalized_count"],
                                         dict_validation["loss"],
                                         dict_validation["regret_full"],
+                                        dict_validation["penalized_count"],
                                     )
                                 )
                             else:
