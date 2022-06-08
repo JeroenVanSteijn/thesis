@@ -5,12 +5,12 @@ import matplotlib.pyplot as plt
 from sklearn import preprocessing
 import torch
 from torch import nn, optim
-from learner import LinearRegression, get_kn_indicators, get_objective_value_penalized_infeasibility, get_weights, get_weights_pred, train_fwdbwd_grad, test_fwd
+from learner import LinearRegression, get_kn_indicators, get_objective_value_penalized_infeasibility, get_weights, get_weights_pred, train_fwdbwd_grad, test_fwd, train_fwdbwd_mse
 import logging
 import datetime
 from collections import defaultdict
 
-class SGD_SPO_dp_lr:
+class MSE_Learner:
     def __init__(
         self,
         capacity=None,
@@ -21,7 +21,6 @@ class SGD_SPO_dp_lr:
         model=None,
         verbose=False,
         plotting=False,
-        plot_title="Learning curve",
         return_regret=False,
         validation_relax=False,
         optimizer=optim.SGD,
@@ -34,7 +33,6 @@ class SGD_SPO_dp_lr:
 
         self.hyperparam = hyperparam
         self.epochs = epochs
-        self.plot_title = plot_title
 
         self.doScale = doScale
         self.verbose = verbose
@@ -171,62 +169,15 @@ class SGD_SPO_dp_lr:
 
             random.shuffle(knapsack_nrs)  # randomly shuffle order of training
             cnt = 0
-            enable_logging = cnt % 20 == 0 and False
             for kn_nr in knapsack_nrs:
-
-                V_true = knaps_V_true[kn_nr]
-                sol_true = knaps_sol[kn_nr][0]
-                optimal_objective_value = np.sum(sol_true * self.values)
-
-                # the true-shifted predictions
-                V_pred = get_weights_pred(self.model, trch_X_train, kn_nr, n_items)
-                V_spo = 2 * V_pred - V_true
-
-                if enable_logging:
-                    print("predicted weights:")
-                    print(V_pred)
-                    print("true weights:")
-                    print(V_true)
-                    print("SPO weights:")
-                    print(V_spo)
-
-                assignments_pred, t = get_kn_indicators(
-                    V_pred,
-                    capacity,
-                    values=self.values,
-                    true_weights=V_true,
-                    warmstart=sol_true,
-                    logging=enable_logging
-                )
-                # Objective value for theta hat
-                sol_pred, _was_penalized = get_objective_value_penalized_infeasibility(assignments_pred, V_true, self.values, capacity)
-
-                assignments_spo, t = get_kn_indicators(
-                    V_spo,
-                    capacity,
-                    values=self.values,
-                    true_weights=V_true,
-                    warmstart=sol_true,
-                    logging=enable_logging
-                )
-                # Objective value for 2 * theta hat - theta
-                sol_spo, _was_penalized = get_objective_value_penalized_infeasibility(assignments_spo, V_true, self.values, capacity)
-                
-                regret = optimal_objective_value - sol_pred
-
-                grad = regret * (sol_spo - sol_true)
-                
-                self.time += t
-
-                ### what if for the whole 48 items at a time
                 kn_start = kn_nr * n_items
                 kn_stop = kn_start + n_items
-                train_fwdbwd_grad(
+
+                train_fwdbwd_mse(
                     self.model,
                     optimizer,
                     trch_X_train[kn_start:kn_stop],
                     trch_y_train[kn_start:kn_stop],
-                    torch.from_numpy(np.array([grad]).T).float(),
                 )
 
                 if self.verbose or self.plotting or self.store_result:
@@ -350,7 +301,7 @@ class SGD_SPO_dp_lr:
                 plt.plot(
                     subepoch_list, regret_list, subepoch_list, regret_list_validation
                 )
-                plt.title(self.plot_title)
+                plt.title("Learning Curve")
                 plt.ylabel("Regret")
                 plt.ylim(top=np.mean(regret_list) + 5 * np.std(regret_list))
                 plt.legend(["training", "validation"])
@@ -374,7 +325,7 @@ class SGD_SPO_dp_lr:
             else:
                 plt.subplot(3, 1, 1)
                 plt.plot(subepoch_list, regret_list)
-                plt.title(self.plot_title)
+                plt.title("Learning Curve")
                 plt.ylabel("Regret")
                 plt.ylim(top=np.mean(regret_list) + 5 * np.std(regret_list))
                 plt.subplot(3, 1, 2)

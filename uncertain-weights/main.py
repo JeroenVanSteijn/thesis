@@ -3,6 +3,7 @@ import random
 from torch import optim
 import numpy as np
 from SPO_learner import SGD_SPO_dp_lr
+from MSE_learner import MSE_Learner
 
 formatter = "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
 logging.basicConfig(filename="knapsackRunner.log", level=logging.INFO, format=formatter)
@@ -27,9 +28,21 @@ random_values = []
 for i in range(0, 48):
     random_values.append(random.randint(1,70))
 
+clf = MSE_Learner(
+    values=random_values,
+    epochs=30,
+    optimizer=optim.Adam,
+    capacity=[60],
+    store_result=True,
+    verbose=True,
+    plotting=True,
+)
+pdf = clf.fit(X_1gtrain, y_train, X_1gvalidation, y_validation, X_1gtest, y_test)
+print(pdf.head())
+
 clf = SGD_SPO_dp_lr(
     values=random_values,
-    epochs=1000,
+    epochs=30,
     optimizer=optim.Adam,
     capacity=[60],
     store_result=True,

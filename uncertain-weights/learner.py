@@ -59,6 +59,19 @@ def get_weights_pred(model, trch_X, kn_nr, n_items):
     model.train()
     return V_pred.data.numpy().T[0]
 
+# Test fwdbwd mse is a training mechanism. It trains the model based on the built in gradient that comes from calculating the MSE loss.
+def train_fwdbwd_mse(model, optimizer, sub_X_train, y_true):
+    inputs = Variable(sub_X_train, requires_grad=True)
+    out = model(inputs)
+
+    optimizer.zero_grad()
+    
+    criterion = torch.nn.MSELoss()
+    loss = criterion(out, y_true)
+    loss.backward()
+
+    optimizer.step()
+
 # Test fwdbwd grad is a training mechanism. It trains the model based on an earlier calculed gradient.
 def train_fwdbwd_grad(model, optimizer, sub_X_train, sub_y_train, grad):
     inputs = Variable(sub_X_train, requires_grad=True)
