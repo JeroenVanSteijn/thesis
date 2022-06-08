@@ -5,10 +5,20 @@ import matplotlib.pyplot as plt
 from sklearn import preprocessing
 import torch
 from torch import nn, optim
-from learner import LinearRegression, get_kn_indicators, get_objective_value_penalized_infeasibility, get_weights, get_weights_pred, train_fwdbwd_grad, test_fwd, train_fwdbwd_mse
+from learner import (
+    LinearRegression,
+    get_kn_indicators,
+    get_objective_value_penalized_infeasibility,
+    get_weights,
+    get_weights_pred,
+    train_fwdbwd_grad,
+    test_fwd,
+    train_fwdbwd_mse,
+)
 import logging
 import datetime
 from collections import defaultdict
+
 
 class MSE_Learner:
     def __init__(
@@ -303,13 +313,14 @@ class MSE_Learner:
                 )
                 plt.title("Learning Curve")
                 plt.ylabel("Regret")
-                plt.ylim(top=np.mean(regret_list) + 5 * np.std(regret_list))
+                plt.ylim(top=np.mean(regret_list) + 5 * np.std(regret_list), bottom=0)
                 plt.legend(["training", "validation"])
                 plt.subplot(3, 1, 2)
                 plt.plot(subepoch_list, loss_list, subepoch_list, loss_list_validation)
                 plt.xlabel("Sub Epochs")
                 plt.ylabel("Loss")
                 plt.yscale("log")
+                plt.ylim(bottom=0)
                 plt.legend(["training", "validation"])
                 plt.subplot(3, 1, 3)
                 plt.plot(
@@ -320,25 +331,28 @@ class MSE_Learner:
                 )
                 plt.xlabel("Sub Epochs")
                 plt.ylabel("Accuracy")
+                plt.ylim(bottom=0)
                 plt.legend(["training", "validation"])
-                plt.show()
+                plt.savefig("mse_plot.png")
             else:
                 plt.subplot(3, 1, 1)
                 plt.plot(subepoch_list, regret_list)
                 plt.title("Learning Curve")
                 plt.ylabel("Regret")
-                plt.ylim(top=np.mean(regret_list) + 5 * np.std(regret_list))
+                plt.ylim(top=np.mean(regret_list) + 5 * np.std(regret_list), bottom=0)
                 plt.subplot(3, 1, 2)
                 plt.plot(subepoch_list, loss_list)
                 plt.yscale("log")
                 plt.xlabel("Sub Epochs")
                 plt.ylabel("Loss")
+                plt.ylim(bottom=0)
                 plt.subplot(3, 1, 3)
                 plt.plot(subepoch_list, accuracy_list)
                 plt.ylim(bottom=np.median(accuracy_list) - 3 * np.std(accuracy_list))
                 plt.xlabel("Sub Epochs")
                 plt.ylabel("Accuracy")
-                plt.show()
+                plt.ylim(bottom=0)
+                plt.savefig("mse_plot.png")
 
         if self.store_result:
             dd = defaultdict(list)

@@ -17,16 +17,24 @@ y_map_function = lambda y: np.round(y / 75) + 1
 y_train = y_map_function(data["y_train"])
 y_test = y_map_function(data["y_test"])
 
-X_1gvalidation = X_1gtest[0:2880, :] # [ 611 0 6 27 7 99 3083.99 53.64 606.13] array of [int int int int int int float float float], 6x int 3x float -> these are the predictive features per item.
-y_validation = y_test[0:2880] # [] floats, length 2880 -> this is the true WEIGHT value of the item. Values between 1 and 50
+X_1gvalidation = X_1gtest[
+    0:2880, :
+]  # [ 611 0 6 27 7 99 3083.99 53.64 606.13] array of [int int int int int int float float float], 6x int 3x float -> these are the predictive features per item.
+y_validation = y_test[
+    0:2880
+]  # [] floats, length 2880 -> this is the true WEIGHT value of the item. Values between 1 and 50
 
-y_test = y_test[2880:] # [] floats, length 8496 -> this is the true WEIGHT value of the item. Values between 1 and 50
-X_1gtest = X_1gtest[2880:, :] # [ 611 0 6 27 7 99 3083.99 53.64 606.13] array of [int int int int int int float float float], 6x int 3x float -> these are the predictive features per item.
+y_test = y_test[
+    2880:
+]  # [] floats, length 8496 -> this is the true WEIGHT value of the item. Values between 1 and 50
+X_1gtest = X_1gtest[
+    2880:, :
+]  # [ 611 0 6 27 7 99 3083.99 53.64 606.13] array of [int int int int int int float float float], 6x int 3x float -> these are the predictive features per item.
 
 
 random_values = []
 for i in range(0, 48):
-    random_values.append(random.randint(1,70))
+    random_values.append(random.randint(1, 70))
 
 clf = MSE_Learner(
     values=random_values,
@@ -37,8 +45,9 @@ clf = MSE_Learner(
     verbose=True,
     plotting=True,
 )
-pdf = clf.fit(X_1gtrain, y_train, X_1gvalidation, y_validation, X_1gtest, y_test)
-print(pdf.head())
+pdf = clf.fit(
+    X_1gtrain, y_train, X_1gvalidation, y_validation, X_1gtest, y_test, plot_title="MSE"
+)
 
 clf = SGD_SPO_dp_lr(
     values=random_values,
@@ -49,7 +58,9 @@ clf = SGD_SPO_dp_lr(
     verbose=True,
     plotting=True,
 )
-pdf = clf.fit(X_1gtrain, y_train, X_1gvalidation, y_validation, X_1gtest, y_test)
+pdf = clf.fit(
+    X_1gtrain, y_train, X_1gvalidation, y_validation, X_1gtest, y_test, plot_title="SPO"
+)
 print(pdf.head())
 
 # np.set_printoptions(suppress=True, threshold=1000000)

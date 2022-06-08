@@ -6,10 +6,18 @@ from sklearn import preprocessing
 import torch
 from torch import nn, optim
 from torch.autograd import Variable
-from learner import LinearRegression, get_kn_indicators, get_profits, get_profits_pred, train_fwdbwd_grad, test_fwd
+from learner import (
+    LinearRegression,
+    get_kn_indicators,
+    get_profits,
+    get_profits_pred,
+    train_fwdbwd_grad,
+    test_fwd,
+)
 import logging
 import datetime
 from collections import defaultdict
+
 
 class SGD_SPO_dp_lr:
     def __init__(
@@ -183,9 +191,11 @@ class SGD_SPO_dp_lr:
                     capacity,
                     warmstart=sol_true,
                     weights=self.weights,
-                ) # Question -> only 0's?, in all replication?
+                )  # Question -> only 0's?, in all replication?
 
-                grad = sol_spo - sol_true # Question -> can (2 * V_pred - V_true) 0 V_true also be a grad? Not in paper?
+                grad = (
+                    sol_spo - sol_true
+                )  # Question -> can (2 * V_pred - V_true) 0 V_true also be a grad? Not in paper?
 
                 if self.degree == 2:
                     sol_pred, t = get_kn_indicators(
@@ -193,7 +203,9 @@ class SGD_SPO_dp_lr:
                         capacity,
                         weights=self.weights,
                     )
-                    reg = sum((sol_true - sol_pred) * V_true) #Question: why not sol_spo - sol_pred??
+                    reg = sum(
+                        (sol_true - sol_pred) * V_true
+                    )  # Question: why not sol_spo - sol_pred??
                     grad = reg * grad
                 self.time += t
 
@@ -347,7 +359,7 @@ class SGD_SPO_dp_lr:
                 plt.xlabel("Sub Epochs")
                 plt.ylabel("Accuracy")
                 plt.legend(["training", "validation"])
-                plt.show()
+                plt.savefig("spo_plot.png")
             else:
                 plt.subplot(3, 1, 1)
                 plt.plot(subepoch_list, regret_list)
@@ -364,7 +376,7 @@ class SGD_SPO_dp_lr:
                 plt.ylim(bottom=np.median(accuracy_list) - 3 * np.std(accuracy_list))
                 plt.xlabel("Sub Epochs")
                 plt.ylabel("Accuracy")
-                plt.show()
+                plt.savefig("spo_plot.png")
 
         if self.store_result:
             dd = defaultdict(list)
