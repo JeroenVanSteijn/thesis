@@ -21,9 +21,8 @@ class SGD_SPO_dp_lr:
         model=None,
         verbose=False,
         plotting=False,
+        plt_show=False,
         plot_title="Learning curve",
-        return_regret=False,
-        validation_relax=False,
         optimizer=optim.SGD,
         store_result=False,
         **hyperparam
@@ -39,10 +38,9 @@ class SGD_SPO_dp_lr:
         self.doScale = doScale
         self.verbose = verbose
         self.plotting = plotting
-        self.return_regret = return_regret
         self.optimizer = optimizer
-        self.validation_relax = validation_relax
         self.store_result = store_result
+        self.plt_show = plt_show
 
         self.scaler = None
         self.model = model
@@ -346,6 +344,7 @@ class SGD_SPO_dp_lr:
         if self.plotting:
 
             if validation:
+                legend = ["training MSE", "validation MSE", "training SPO", "validation SPO"] if self.plt_show else ["training", "validation"] 
                 plt.subplot(3, 1, 1)
                 plt.plot(
                     subepoch_list, regret_list, subepoch_list, regret_list_validation
@@ -353,14 +352,14 @@ class SGD_SPO_dp_lr:
                 plt.title(self.plot_title)
                 plt.ylabel("Regret")
                 plt.ylim(top=np.mean(regret_list) + 5 * np.std(regret_list), bottom=0)
-                plt.legend(["training", "validation"])
+                plt.legend(legend)
                 plt.subplot(3, 1, 2)
                 plt.plot(subepoch_list, loss_list, subepoch_list, loss_list_validation)
                 plt.xlabel("Sub Epochs")
                 plt.ylabel("Loss")
                 plt.ylim(bottom=0)
                 plt.yscale("log")
-                plt.legend(["training", "validation"])
+                plt.legend(legend)
                 plt.subplot(3, 1, 3)
                 plt.plot(
                     subepoch_list,
@@ -371,8 +370,11 @@ class SGD_SPO_dp_lr:
                 plt.xlabel("Sub Epochs")
                 plt.ylabel("Accuracy")
                 plt.ylim(bottom=0)
-                plt.legend(["training", "validation"])
-                plt.show()
+                plt.legend(legend)
+                if self.plt_show:
+                    plt.show()
+                else:
+                    plt.savefig("spo.png")
             else:
                 plt.subplot(3, 1, 1)
                 plt.plot(subepoch_list, regret_list)
@@ -391,7 +393,10 @@ class SGD_SPO_dp_lr:
                 plt.xlabel("Sub Epochs")
                 plt.ylabel("Accuracy")
                 plt.ylim(bottom=0)
-                plt.show()
+                if self.plt_show:
+                    plt.show()
+                else:
+                    plt.savefig("spo.png")
 
         if self.store_result:
             dd = defaultdict(list)

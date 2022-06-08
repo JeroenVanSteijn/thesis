@@ -8,10 +8,7 @@ from torch import nn, optim
 from learner import (
     LinearRegression,
     get_kn_indicators,
-    get_objective_value_penalized_infeasibility,
     get_weights,
-    get_weights_pred,
-    train_fwdbwd_grad,
     test_fwd,
     train_fwdbwd_mse,
 )
@@ -26,14 +23,13 @@ class MSE_Learner:
         capacity=None,
         values=None,
         epochs=2,
+        plt_show=False,
         doScale=True,
         n_items=48,
         model=None,
         verbose=False,
         plotting=False,
         plot_title="Learning curve",
-        return_regret=False,
-        validation_relax=False,
         optimizer=optim.SGD,
         store_result=False,
         **hyperparam
@@ -46,12 +42,12 @@ class MSE_Learner:
         self.epochs = epochs
         self.plot_title = plot_title
 
+        self.plt_show = plt_show
+
         self.doScale = doScale
         self.verbose = verbose
         self.plotting = plotting
-        self.return_regret = return_regret
         self.optimizer = optimizer
-        self.validation_relax = validation_relax
         self.store_result = store_result
 
         self.scaler = None
@@ -335,7 +331,10 @@ class MSE_Learner:
                 plt.ylabel("Accuracy")
                 plt.ylim(bottom=0)
                 plt.legend(["training", "validation"])
-                plt.savefig("mse_plot.png")
+                if self.plt_show:
+                    plt.show()
+                else:
+                    plt.savefig("mse_plot.png")
             else:
                 plt.subplot(3, 1, 1)
                 plt.plot(subepoch_list, regret_list)
@@ -354,7 +353,10 @@ class MSE_Learner:
                 plt.xlabel("Sub Epochs")
                 plt.ylabel("Accuracy")
                 plt.ylim(bottom=0)
-                plt.savefig("mse_plot.png")
+                if self.plt_show:
+                    plt.show()
+                else:
+                    plt.savefig("mse_plot.png")
 
         if self.store_result:
             dd = defaultdict(list)

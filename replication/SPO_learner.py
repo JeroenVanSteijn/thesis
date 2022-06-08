@@ -359,7 +359,7 @@ class SGD_SPO_dp_lr:
                 plt.xlabel("Sub Epochs")
                 plt.ylabel("Accuracy")
                 plt.legend(["training", "validation"])
-                plt.savefig("spo_plot.png")
+                plt.show()
             else:
                 plt.subplot(3, 1, 1)
                 plt.plot(subepoch_list, regret_list)
@@ -376,7 +376,7 @@ class SGD_SPO_dp_lr:
                 plt.ylim(bottom=np.median(accuracy_list) - 3 * np.std(accuracy_list))
                 plt.xlabel("Sub Epochs")
                 plt.ylabel("Accuracy")
-                plt.savefig("spo_plot.png")
+                plt.show()
 
         if self.store_result:
             dd = defaultdict(list)

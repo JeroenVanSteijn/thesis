@@ -58,7 +58,8 @@ clf = SGD_SPO_dp_lr(
     store_result=True,
     verbose=True,
     plotting=True,
-    plot_title="MSE"
+    plot_title="SPO vs MSE",
+    plt_show=True
 )
 pdf = clf.fit(
     X_1gtrain, y_train, X_1gvalidation, y_validation, X_1gtest, y_test
