@@ -44,9 +44,10 @@ clf = MSE_Learner(
     store_result=True,
     verbose=True,
     plotting=True,
+    plot_title="MSE"
 )
 pdf = clf.fit(
-    X_1gtrain, y_train, X_1gvalidation, y_validation, X_1gtest, y_test, plot_title="MSE"
+    X_1gtrain, y_train, X_1gvalidation, y_validation, X_1gtest, y_test
 )
 
 clf = SGD_SPO_dp_lr(
@@ -57,9 +58,10 @@ clf = SGD_SPO_dp_lr(
     store_result=True,
     verbose=True,
     plotting=True,
+    plot_title="MSE"
 )
 pdf = clf.fit(
-    X_1gtrain, y_train, X_1gvalidation, y_validation, X_1gtest, y_test, plot_title="SPO"
+    X_1gtrain, y_train, X_1gvalidation, y_validation, X_1gtest, y_test
 )
 print(pdf.head())
 
