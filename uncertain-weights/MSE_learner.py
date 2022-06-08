@@ -31,6 +31,7 @@ class MSE_Learner:
         model=None,
         verbose=False,
         plotting=False,
+        plot_title="Learning curve",
         return_regret=False,
         validation_relax=False,
         optimizer=optim.SGD,
@@ -43,6 +44,7 @@ class MSE_Learner:
 
         self.hyperparam = hyperparam
         self.epochs = epochs
+        self.plot_title = plot_title
 
         self.doScale = doScale
         self.verbose = verbose
@@ -311,7 +313,7 @@ class MSE_Learner:
                 plt.plot(
                     subepoch_list, regret_list, subepoch_list, regret_list_validation
                 )
-                plt.title("Learning Curve")
+                plt.title(self.plot_title)
                 plt.ylabel("Regret")
                 plt.ylim(top=np.mean(regret_list) + 5 * np.std(regret_list), bottom=0)
                 plt.legend(["training", "validation"])
@@ -337,7 +339,7 @@ class MSE_Learner:
             else:
                 plt.subplot(3, 1, 1)
                 plt.plot(subepoch_list, regret_list)
-                plt.title("Learning Curve")
+                plt.title(self.plot_title)
                 plt.ylabel("Regret")
                 plt.ylim(top=np.mean(regret_list) + 5 * np.std(regret_list), bottom=0)
                 plt.subplot(3, 1, 2)
