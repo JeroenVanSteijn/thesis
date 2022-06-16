@@ -25,6 +25,7 @@ class SGD_SPO_dp_lr:
         plot_title="Learning curve",
         optimizer=optim.SGD,
         store_result=False,
+        penalty_P=2,
         **hyperparam
     ):
         self.n_items = n_items
@@ -46,6 +47,8 @@ class SGD_SPO_dp_lr:
         self.model = model
         self.best_params_ = {"p": "default"}
         self.time = 0
+
+        self.penalty_P = penalty_P
 
     def fit(
         self,
@@ -197,7 +200,7 @@ class SGD_SPO_dp_lr:
                     logging=enable_logging
                 )
                 # Objective value for theta hat
-                sol_pred, _was_penalized = get_objective_value_penalized_infeasibility(assignments_pred, V_true, self.values, capacity)
+                sol_pred, _was_penalized = get_objective_value_penalized_infeasibility(assignments_pred, V_true, self.values, capacity, self.penalty_P)
 
                 assignments_spo, t = get_kn_indicators(
                     V_spo,
@@ -208,7 +211,7 @@ class SGD_SPO_dp_lr:
                     logging=enable_logging
                 )
                 # Objective value for 2 * theta hat - theta
-                sol_spo, _was_penalized = get_objective_value_penalized_infeasibility(assignments_spo, V_true, self.values, capacity)
+                sol_spo, _was_penalized = get_objective_value_penalized_infeasibility(assignments_spo, V_true, self.values, capacity, self.penalty_P)
                 
                 regret = optimal_objective_value - sol_pred
 
@@ -245,6 +248,7 @@ class SGD_SPO_dp_lr:
                             capacity,
                             knaps_sol,
                             values=self.values,
+                            penalty_P=self.penalty_P,
                         )
                         if validation:
                             dict_validation = test_fwd(
@@ -256,6 +260,7 @@ class SGD_SPO_dp_lr:
                                 capacity,
                                 knaps_sol_validation,
                                 values=self.values,
+                                penalty_P=self.penalty_P,
                             )
                         if test:
                             dict_test = test_fwd(
@@ -267,6 +272,7 @@ class SGD_SPO_dp_lr:
                                 capacity,
                                 knaps_sol_test,
                                 values=self.values,
+                                penalty_P=self.penalty_P,
                             )
                         self.time += dict_validation["runtime"]
                         if self.store_result:

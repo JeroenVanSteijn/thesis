@@ -32,6 +32,7 @@ class MSE_Learner:
         plot_title="Learning curve",
         optimizer=optim.SGD,
         store_result=False,
+        penalty_P=2,
         **hyperparam
     ):
         self.n_items = n_items
@@ -54,6 +55,8 @@ class MSE_Learner:
         self.model = model
         self.best_params_ = {"p": "default"}
         self.time = 0
+
+        self.penalty_P = penalty_P
 
     def fit(
         self,
@@ -206,6 +209,7 @@ class MSE_Learner:
                             capacity,
                             knaps_sol,
                             values=self.values,
+                            penalty_P=self.penalty_P,
                         )
                         if validation:
                             dict_validation = test_fwd(
@@ -217,6 +221,7 @@ class MSE_Learner:
                                 capacity,
                                 knaps_sol_validation,
                                 values=self.values,
+                                penalty_P=self.penalty_P,
                             )
                         if test:
                             dict_test = test_fwd(
@@ -228,6 +233,7 @@ class MSE_Learner:
                                 capacity,
                                 knaps_sol_test,
                                 values=self.values,
+                                penalty_P=self.penalty_P,
                             )
                         self.time += dict_validation["runtime"]
                         if self.store_result:

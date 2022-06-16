@@ -44,6 +44,7 @@ for i in range(0, 48):
         random_values.append(random.randint(0, 600))
 
 epochs = 30
+penalty_P = 2
 
 clf = MSE_Learner(
     values=random_values,
@@ -53,7 +54,8 @@ clf = MSE_Learner(
     store_result=True,
     verbose=True,
     plotting=True,
-    plot_title="MSE"
+    plot_title="MSE",
+    penalty_P=penalty_P
 )
 pdf = clf.fit(
     X_1gtrain, y_train, X_1gvalidation, y_validation, X_1gtest, y_test
@@ -68,7 +70,8 @@ clf = SGD_SPO_dp_lr(
     verbose=True,
     plotting=True,
     plot_title="SPO vs MSE with repair function",
-    plt_show=True
+    plt_show=True,
+    penalty_P=penalty_P
 )
 pdf = clf.fit(
     X_1gtrain, y_train, X_1gvalidation, y_validation, X_1gtest, y_test
