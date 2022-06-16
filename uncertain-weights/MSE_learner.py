@@ -311,7 +311,7 @@ class MSE_Learner:
                 )
                 plt.title(self.plot_title)
                 plt.ylabel("Regret")
-                plt.ylim(top=np.mean(regret_list) + 5 * np.std(regret_list), bottom=0)
+                plt.ylim(top=np.mean(regret_list) + 6 * np.std(regret_list), bottom=0)
                 plt.legend(["training", "validation"])
                 plt.subplot(3, 1, 2)
                 plt.plot(subepoch_list, loss_list, subepoch_list, loss_list_validation)

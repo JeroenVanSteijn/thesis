@@ -43,9 +43,11 @@ for i in range(0, 48):
     else:
         random_values.append(random.randint(0, 600))
 
+epochs = 30
+
 clf = MSE_Learner(
     values=random_values,
-    epochs=30,
+    epochs=epochs,
     optimizer=optim.Adam,
     capacity=[60],
     store_result=True,
@@ -59,13 +61,13 @@ pdf = clf.fit(
 
 clf = SGD_SPO_dp_lr(
     values=random_values,
-    epochs=30,
+    epochs=epochs,
     optimizer=optim.Adam,
     capacity=[60],
     store_result=True,
     verbose=True,
     plotting=True,
-    plot_title="SPO vs MSE",
+    plot_title="SPO vs MSE with repair function",
     plt_show=True
 )
 pdf = clf.fit(

@@ -36,7 +36,7 @@ def get_objective_value_penalized_infeasibility(assignments, true_weights, value
                 capacity_used = new_total
             else:
                 infeasible = True
-                total_value -= values[index] * 2
+                total_value -= values[index] * 10
     
     return total_value, infeasible
 
