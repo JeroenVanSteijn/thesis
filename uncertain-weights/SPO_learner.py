@@ -26,6 +26,7 @@ class SGD_SPO_dp_lr:
         optimizer=optim.SGD,
         store_result=False,
         penalty_P=2,
+        penalty_function_type="linear_values",
         **hyperparam
     ):
         self.n_items = n_items
@@ -49,6 +50,7 @@ class SGD_SPO_dp_lr:
         self.time = 0
 
         self.penalty_P = penalty_P
+        self.penalty_function_type = penalty_function_type
 
     def fit(
         self,
@@ -183,14 +185,6 @@ class SGD_SPO_dp_lr:
                 V_pred = get_weights_pred(self.model, trch_X_train, kn_nr, n_items)
                 V_spo = 2 * V_pred - V_true
 
-                if enable_logging:
-                    print("predicted weights:")
-                    print(V_pred)
-                    print("true weights:")
-                    print(V_true)
-                    print("SPO weights:")
-                    print(V_spo)
-
                 assignments_pred, t = get_kn_indicators(
                     V_pred,
                     capacity,
@@ -200,7 +194,7 @@ class SGD_SPO_dp_lr:
                     logging=enable_logging
                 )
                 # Objective value for theta hat
-                sol_pred, _was_penalized = get_objective_value_penalized_infeasibility(assignments_pred, V_true, self.values, capacity, self.penalty_P)
+                sol_pred, _was_penalized = get_objective_value_penalized_infeasibility(assignments_pred, V_true, self.values, capacity, self.penalty_P, self.penalty_function_type)
 
                 assignments_spo, t = get_kn_indicators(
                     V_spo,
@@ -211,7 +205,7 @@ class SGD_SPO_dp_lr:
                     logging=enable_logging
                 )
                 # Objective value for 2 * theta hat - theta
-                sol_spo, _was_penalized = get_objective_value_penalized_infeasibility(assignments_spo, V_true, self.values, capacity, self.penalty_P)
+                sol_spo, _was_penalized = get_objective_value_penalized_infeasibility(assignments_spo, V_true, self.values, capacity, self.penalty_P, self.penalty_function_type)
                 
                 regret = optimal_objective_value - sol_pred
 
@@ -249,6 +243,7 @@ class SGD_SPO_dp_lr:
                             knaps_sol,
                             values=self.values,
                             penalty_P=self.penalty_P,
+                            penalty_function_type=self.penalty_function_type
                         )
                         if validation:
                             dict_validation = test_fwd(
@@ -261,6 +256,7 @@ class SGD_SPO_dp_lr:
                                 knaps_sol_validation,
                                 values=self.values,
                                 penalty_P=self.penalty_P,
+                                penalty_function_type=self.penalty_function_type
                             )
                         if test:
                             dict_test = test_fwd(
@@ -273,6 +269,7 @@ class SGD_SPO_dp_lr:
                                 knaps_sol_test,
                                 values=self.values,
                                 penalty_P=self.penalty_P,
+                                penalty_function_type=self.penalty_function_type
                             )
                         self.time += dict_validation["runtime"]
                         if self.store_result:

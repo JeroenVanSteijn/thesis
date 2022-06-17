@@ -21,7 +21,7 @@ def get_kn_indicators(
     assignments = np.asarray(solution["assignments"])
     return assignments, solution["runtime"]
 
-def get_objective_value_penalized_infeasibility(assignments, true_weights, values, capacity, penalty_P):
+def get_objective_value_penalized_infeasibility(assignments, true_weights, values, capacity, penalty_P, penalty_function_type):
     capacity = capacity[0]
     capacity_used = 0
     total_value = 0
@@ -36,7 +36,14 @@ def get_objective_value_penalized_infeasibility(assignments, true_weights, value
                 capacity_used = new_total
             else:
                 infeasible = True
-                total_value -= values[index] * penalty_P
+                if penalty_function_type == "linear_weights":
+                    total_value -= true_weights[index] * penalty_P
+
+                elif penalty_function_type == "linear_values":
+                    total_value -= values[index] * penalty_P
+                
+                else:
+                    raise Exception("Invalid penalty function type.")
     
     return total_value, infeasible
 
@@ -96,7 +103,8 @@ def test_fwd(
     capacity,
     knaps_sol,
     values,
-    penalty_P
+    penalty_P,
+    penalty_function_type
 ):
     info = dict()
     model.eval()
@@ -126,7 +134,7 @@ def test_fwd(
         assignments_true = knaps_sol[kn_nr][0]
 
         optimal_value = np.sum(values * (assignments_true))
-        achieved_value, was_penalized = get_objective_value_penalized_infeasibility(assignments_pred, V_true, values, capacity, penalty_P)
+        achieved_value, was_penalized = get_objective_value_penalized_infeasibility(assignments_pred, V_true, values, capacity, penalty_P, penalty_function_type)
 
         if was_penalized:
             penalized_count = penalized_count + 1 

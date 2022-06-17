@@ -33,6 +33,7 @@ class MSE_Learner:
         optimizer=optim.SGD,
         store_result=False,
         penalty_P=2,
+        penalty_function_type="linear_values",
         **hyperparam
     ):
         self.n_items = n_items
@@ -57,6 +58,7 @@ class MSE_Learner:
         self.time = 0
 
         self.penalty_P = penalty_P
+        self.penalty_function_type = penalty_function_type
 
     def fit(
         self,
@@ -210,6 +212,7 @@ class MSE_Learner:
                             knaps_sol,
                             values=self.values,
                             penalty_P=self.penalty_P,
+                            penalty_function_type=self.penalty_function_type
                         )
                         if validation:
                             dict_validation = test_fwd(
@@ -222,6 +225,7 @@ class MSE_Learner:
                                 knaps_sol_validation,
                                 values=self.values,
                                 penalty_P=self.penalty_P,
+                                penalty_function_type=self.penalty_function_type
                             )
                         if test:
                             dict_test = test_fwd(
@@ -234,6 +238,7 @@ class MSE_Learner:
                                 knaps_sol_test,
                                 values=self.values,
                                 penalty_P=self.penalty_P,
+                                penalty_function_type=self.penalty_function_type
                             )
                         self.time += dict_validation["runtime"]
                         if self.store_result:

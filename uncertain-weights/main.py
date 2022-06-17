@@ -44,7 +44,9 @@ for i in range(0, 48):
         random_values.append(random.randint(0, 600))
 
 epochs = 30
-penalty_P = 2
+penalty_P = 100
+# penalty_function_type = "linear_values"
+penalty_function_type = "linear_weights"
 
 clf = MSE_Learner(
     values=random_values,
@@ -55,7 +57,8 @@ clf = MSE_Learner(
     verbose=True,
     plotting=True,
     plot_title="MSE",
-    penalty_P=penalty_P
+    penalty_P=penalty_P,
+    penalty_function_type=penalty_function_type
 )
 pdf = clf.fit(
     X_1gtrain, y_train, X_1gvalidation, y_validation, X_1gtest, y_test
@@ -69,9 +72,10 @@ clf = SGD_SPO_dp_lr(
     store_result=True,
     verbose=True,
     plotting=True,
-    plot_title="SPO vs MSE with repair function",
+    plot_title="SPO vs MSE with penalty function linear in weights",
     plt_show=True,
-    penalty_P=penalty_P
+    penalty_P=penalty_P,
+    penalty_function_type=penalty_function_type
 )
 pdf = clf.fit(
     X_1gtrain, y_train, X_1gvalidation, y_validation, X_1gtest, y_test
