@@ -5,58 +5,52 @@ import matplotlib.pyplot as plt
 from sklearn import preprocessing
 import torch
 from torch import nn, optim
-from torch.autograd import Variable
-from learner import (
-    LinearRegression,
-    get_kn_indicators,
-    get_profits,
-    get_profits_pred,
-    train_fwdbwd_grad,
-    test_fwd,
-)
+from learner import LinearRegression, get_kn_indicators, get_objective_value_penalized_infeasibility, get_weights, get_weights_pred, train_fwdbwd_grad, test_fwd
 import logging
 import datetime
 from collections import defaultdict
-
 
 class SGD_SPO_dp_lr:
     def __init__(
         self,
         capacity=None,
-        weights=None,
+        values=None,
         epochs=2,
         doScale=True,
         n_items=48,
         model=None,
         verbose=False,
         plotting=False,
-        return_regret=False,
-        validation_relax=False,
-        degree=1,
+        plt_show=False,
+        plot_title="Learning curve",
         optimizer=optim.SGD,
         store_result=False,
+        penalty_P=2,
+        penalty_function_type="linear_values",
         **hyperparam
     ):
         self.n_items = n_items
         self.capacity = capacity
-        self.weights = weights
+        self.values = values
 
         self.hyperparam = hyperparam
         self.epochs = epochs
+        self.plot_title = plot_title
 
         self.doScale = doScale
         self.verbose = verbose
         self.plotting = plotting
-        self.return_regret = return_regret
         self.optimizer = optimizer
-        self.degree = degree
-        self.validation_relax = validation_relax
         self.store_result = store_result
+        self.plt_show = plt_show
 
         self.scaler = None
         self.model = model
         self.best_params_ = {"p": "default"}
         self.time = 0
+
+        self.penalty_P = penalty_P
+        self.penalty_function_type = penalty_function_type
 
     def fit(
         self,
@@ -109,13 +103,14 @@ class SGD_SPO_dp_lr:
 
         # prepping
         knaps_V_true = [
-            get_profits(trch_y_train, kn_nr, n_items) for kn_nr in range(n_knapsacks)
+            get_weights(trch_y_train, kn_nr, n_items) for kn_nr in range(n_knapsacks)
         ]
         knaps_sol = [
             get_kn_indicators(
                 V_true,
                 capacity,
-                weights=self.weights,
+                values=self.values,
+                true_weights=V_true,
             )
             for V_true in knaps_V_true
         ]
@@ -125,14 +120,15 @@ class SGD_SPO_dp_lr:
         if validation:
             n_knapsacks_validation = len(trch_X_validation) // n_items
             knaps_V_true_validation = [
-                get_profits(trch_y_validation, kn_nr, n_items)
+                get_weights(trch_y_validation, kn_nr, n_items)
                 for kn_nr in range(n_knapsacks_validation)
             ]
             knaps_sol_validation = [
                 get_kn_indicators(
                     V_true,
                     capacity,
-                    weights=self.weights,
+                    values=self.values,
+                    true_weights=V_true,
                 )
                 for V_true in knaps_V_true_validation
             ]
@@ -142,14 +138,15 @@ class SGD_SPO_dp_lr:
         if test:
             n_knapsacks_test = len(trch_X_test) // n_items
             knaps_V_true_test = [
-                get_profits(trch_y_test, kn_nr, n_items)
+                get_weights(trch_y_test, kn_nr, n_items)
                 for kn_nr in range(n_knapsacks_test)
             ]
             knaps_sol_test = [
                 get_kn_indicators(
                     V_true,
                     capacity,
-                    weights=self.weights,
+                    values=self.values,
+                    true_weights=V_true,
                 )
                 for V_true in knaps_V_true_test
             ]
@@ -177,36 +174,43 @@ class SGD_SPO_dp_lr:
 
             random.shuffle(knapsack_nrs)  # randomly shuffle order of training
             cnt = 0
+            enable_logging = cnt % 20 == 0 and False
             for kn_nr in knapsack_nrs:
 
                 V_true = knaps_V_true[kn_nr]
                 sol_true = knaps_sol[kn_nr][0]
+                optimal_objective_value = np.sum(sol_true * self.values)
 
                 # the true-shifted predictions
-                V_pred = get_profits_pred(self.model, trch_X_train, kn_nr, n_items)
+                V_pred = get_weights_pred(self.model, trch_X_train, kn_nr, n_items)
                 V_spo = 2 * V_pred - V_true
 
-                sol_spo, t = get_kn_indicators(
+                assignments_pred, t = get_kn_indicators(
+                    V_pred,
+                    capacity,
+                    values=self.values,
+                    true_weights=V_true,
+                    warmstart=sol_true,
+                    logging=enable_logging
+                )
+                # Objective value for theta hat
+                sol_pred, _was_penalized = get_objective_value_penalized_infeasibility(assignments_pred, V_true, self.values, capacity, self.penalty_P, self.penalty_function_type)
+
+                assignments_spo, t = get_kn_indicators(
                     V_spo,
                     capacity,
+                    values=self.values,
+                    true_weights=V_true,
                     warmstart=sol_true,
-                    weights=self.weights,
-                )  # Question -> only 0's?, in all replication?
+                    logging=enable_logging
+                )
+                # Objective value for 2 * theta hat - theta
+                sol_spo, _was_penalized = get_objective_value_penalized_infeasibility(assignments_spo, V_true, self.values, capacity, self.penalty_P, self.penalty_function_type)
+                
+                regret = optimal_objective_value - sol_pred
 
-                grad = (
-                    sol_spo - sol_true
-                )  # Question -> can (2 * V_pred - V_true) 0 V_true also be a grad? Not in paper?
-
-                if self.degree == 2:
-                    sol_pred, t = get_kn_indicators(
-                        V_pred,
-                        capacity,
-                        weights=self.weights,
-                    )
-                    reg = sum(
-                        (sol_true - sol_pred) * V_true
-                    )  # Question: why not sol_spo - sol_pred??
-                    grad = reg * grad
+                grad = regret * (sol_spo - sol_true)
+                
                 self.time += t
 
                 ### what if for the whole 48 items at a time
@@ -237,7 +241,9 @@ class SGD_SPO_dp_lr:
                             n_items,
                             capacity,
                             knaps_sol,
-                            weights=self.weights,
+                            values=self.values,
+                            penalty_P=self.penalty_P,
+                            penalty_function_type=self.penalty_function_type
                         )
                         if validation:
                             dict_validation = test_fwd(
@@ -248,7 +254,9 @@ class SGD_SPO_dp_lr:
                                 n_items,
                                 capacity,
                                 knaps_sol_validation,
-                                weights=self.weights,
+                                values=self.values,
+                                penalty_P=self.penalty_P,
+                                penalty_function_type=self.penalty_function_type
                             )
                         if test:
                             dict_test = test_fwd(
@@ -259,7 +267,9 @@ class SGD_SPO_dp_lr:
                                 n_items,
                                 capacity,
                                 knaps_sol_test,
-                                weights=self.weights,
+                                values=self.values,
+                                penalty_P=self.penalty_P,
+                                penalty_function_type=self.penalty_function_type
                             )
                         self.time += dict_validation["runtime"]
                         if self.store_result:
@@ -310,14 +320,16 @@ class SGD_SPO_dp_lr:
                             if validation:
                                 logger.append((dict_epoch, dict_train, dict_validation))
                                 print(
-                                    "Epoch[{}/{}]::{}, loss(train): {:.6f}, regret(train): {:.2f}, loss(validation): {:.6f}, regret(validation): {:.2f}".format(
+                                    "Epoch[{}/{}]::{}, loss(train): {:.6f}, regret(train): {:.2f},  penalized(train): {:.2f}, loss(validation): {:.6f}, regret(validation): {:.2f}, penalized(train): {:.2f}".format(
                                         epoch + 1,
                                         num_epochs,
                                         cnt,
                                         dict_train["loss"],
                                         dict_train["regret_full"],
+                                        dict_train["penalized_count"],
                                         dict_validation["loss"],
                                         dict_validation["regret_full"],
+                                        dict_validation["penalized_count"],
                                     )
                                 )
                             else:
@@ -335,20 +347,22 @@ class SGD_SPO_dp_lr:
         if self.plotting:
 
             if validation:
+                legend = ["training MSE", "validation MSE", "training SPO", "validation SPO"] if self.plt_show else ["training", "validation"] 
                 plt.subplot(3, 1, 1)
                 plt.plot(
                     subepoch_list, regret_list, subepoch_list, regret_list_validation
                 )
-                plt.title("Learning Curve")
+                plt.title(self.plot_title)
                 plt.ylabel("Regret")
-                plt.ylim(top=np.mean(regret_list) + 5 * np.std(regret_list))
-                plt.legend(["training", "validation"])
+                plt.ylim(top=np.mean(regret_list) + 5 * np.std(regret_list), bottom=0)
+                plt.legend(legend)
                 plt.subplot(3, 1, 2)
                 plt.plot(subepoch_list, loss_list, subepoch_list, loss_list_validation)
                 plt.xlabel("Sub Epochs")
                 plt.ylabel("Loss")
+                plt.ylim(bottom=0)
                 plt.yscale("log")
-                plt.legend(["training", "validation"])
+                plt.legend(legend)
                 plt.subplot(3, 1, 3)
                 plt.plot(
                     subepoch_list,
@@ -358,25 +372,34 @@ class SGD_SPO_dp_lr:
                 )
                 plt.xlabel("Sub Epochs")
                 plt.ylabel("Accuracy")
-                plt.legend(["training", "validation"])
-                plt.show()
+                plt.ylim(bottom=0)
+                plt.legend(legend)
+                if self.plt_show:
+                    plt.show()
+                else:
+                    plt.savefig("spo.png")
             else:
                 plt.subplot(3, 1, 1)
                 plt.plot(subepoch_list, regret_list)
-                plt.title("Learning Curve")
+                plt.title(self.plot_title)
                 plt.ylabel("Regret")
-                plt.ylim(top=np.mean(regret_list) + 5 * np.std(regret_list))
+                plt.ylim(top=np.mean(regret_list) + 5 * np.std(regret_list), bottom=0)
                 plt.subplot(3, 1, 2)
                 plt.plot(subepoch_list, loss_list)
                 plt.yscale("log")
                 plt.xlabel("Sub Epochs")
                 plt.ylabel("Loss")
+                plt.ylim(bottom=0)
                 plt.subplot(3, 1, 3)
                 plt.plot(subepoch_list, accuracy_list)
                 plt.ylim(bottom=np.median(accuracy_list) - 3 * np.std(accuracy_list))
                 plt.xlabel("Sub Epochs")
                 plt.ylabel("Accuracy")
-                plt.show()
+                plt.ylim(bottom=0)
+                if self.plt_show:
+                    plt.show()
+                else:
+                    plt.savefig("spo.png")
 
         if self.store_result:
             dd = defaultdict(list)

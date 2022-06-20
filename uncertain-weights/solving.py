@@ -1,6 +1,6 @@
 from gurobipy import Model, quicksum, GRB
 
-def solveKnapsackProblem(profits, weights, capacity, warmstart=None):
+def solveKnapsackProblem(weights, profits, capacity, warmstart=None):
     profits = [v for v in profits]
     weights = [[w for w in W] for W in weights]
     capacity = [c for c in capacity]
