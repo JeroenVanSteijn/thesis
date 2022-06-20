@@ -44,7 +44,7 @@ for i in range(0, 48):
         random_values.append(random.randint(0, 600))
 
 epochs = 30
-penalty_P = 100
+penalty_P = 1000
 # penalty_function_type = "linear_values"
 penalty_function_type = "linear_weights"
 
