@@ -7,10 +7,10 @@ from MSE_learner import MSE_Learner
 
 # VARIABLES FOR EXPERIMENTS:
 epochs = 30 # number of epochs to train
-penalty_P = 1 # p value for penalization (if relevant)
+penalty_P = 2 # p value for penalization (if relevant)
 penalty_function_type = "linear_values" # penalty_function_type = "linear_values"
 type_of_mirroring = "correlation" # type_of_mirroring = "weight_value_sizes"
-plot_title = "Repair function, on instances with similar correlation to the original experiment"
+plot_title = "Penalty linear in weights, on instances with similar correlation to the original experiment, P = 2"
 
 # END VARIABLES FOR EXPERIMENTS
 
@@ -106,4 +106,3 @@ pdf = clf.fit(
 print(pdf.head())
 
 np.set_printoptions(suppress=True, threshold=1000000)
-print(max(y_validation))

@@ -73,8 +73,6 @@ class MSE_Learner:
         validation = (x_validation is not None) and (y_validation is not None)
         test = (x_test is not None) and (y_test is not None)
 
-        print(x_train)
-
         # scale data?
         if self.doScale:
             self.scaler = preprocessing.StandardScaler().fit(x_train)
