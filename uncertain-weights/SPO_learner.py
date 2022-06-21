@@ -58,12 +58,9 @@ class SGD_SPO_dp_lr:
         y_train,
         x_validation=None,
         y_validation=None,
-        x_test=None,
-        y_test=None,
     ):
         x_train = x_train[:, 1:]  # without group ID
         validation = (x_validation is not None) and (y_validation is not None)
-        test = (x_test is not None) and (y_test is not None)
 
         # scale data?
         if self.doScale:
@@ -78,13 +75,6 @@ class SGD_SPO_dp_lr:
                 x_validation = self.scaler.transform(x_validation)
             trch_X_validation = torch.from_numpy(x_validation).float()
             trch_y_validation = torch.from_numpy(np.array([y_validation]).T).float()
-
-        if test:
-            x_test = x_test[:, 1:]
-            if self.doScale:
-                x_test = self.scaler.transform(x_test)
-            trch_X_test = torch.from_numpy(x_test).float()
-            trch_y_test = torch.from_numpy(np.array([y_test]).T).float()
 
         if self.plotting:
             subepoch_list = []
@@ -135,22 +125,6 @@ class SGD_SPO_dp_lr:
             for k in knaps_sol_validation:
                 self.time += k[1]
 
-        if test:
-            n_knapsacks_test = len(trch_X_test) // n_items
-            knaps_V_true_test = [
-                get_weights(trch_y_test, kn_nr, n_items)
-                for kn_nr in range(n_knapsacks_test)
-            ]
-            knaps_sol_test = [
-                get_kn_indicators(
-                    V_true,
-                    capacity,
-                    values=self.values,
-                    true_weights=V_true,
-                )
-                for V_true in knaps_V_true_test
-            ]
-
         # network
         if not self.model:
             self.model = LinearRegression(
@@ -164,7 +138,7 @@ class SGD_SPO_dp_lr:
 
         # training
         subepoch = 0  # for logging and nice curves
-        logger = []  # (dict_epoch, dict_train, dict_test)
+        logger = []  # (dict_epoch, dict_train)
         test_result = []
         knapsack_nrs = [x for x in range(n_knapsacks)]
         for epoch in range(num_epochs):
@@ -258,19 +232,6 @@ class SGD_SPO_dp_lr:
                                 penalty_P=self.penalty_P,
                                 penalty_function_type=self.penalty_function_type
                             )
-                        if test:
-                            dict_test = test_fwd(
-                                self.model,
-                                criterion,
-                                trch_X_test,
-                                trch_y_test,
-                                n_items,
-                                capacity,
-                                knaps_sol_test,
-                                values=self.values,
-                                penalty_P=self.penalty_P,
-                                penalty_function_type=self.penalty_function_type
-                            )
                         self.time += dict_validation["runtime"]
                         if self.store_result:
                             info = {}
@@ -282,9 +243,6 @@ class SGD_SPO_dp_lr:
                                 "regret_full"
                             ]
                             info["validation_accuracy"] = dict_validation["accuracy"]
-                            info["test_loss"] = dict_test["loss"]
-                            info["test_regret_full"] = dict_test["regret_full"]
-                            info["test_accuracy"] = dict_test["accuracy"]
                             info["subepoch"] = subepoch
                             info["time"] = self.time
                             test_result.append(info)
