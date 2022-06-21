@@ -340,6 +340,7 @@ class SGD_SPO_dp_lr:
                 )
                 plt.title("Learning Curve")
                 plt.ylabel("Regret")
+                plt.xlabel("Sub epoch")
                 plt.legend(["training", "validation"])
                 plt.show()
             else:
@@ -349,6 +350,7 @@ class SGD_SPO_dp_lr:
                 plt.title("Learning Curve")
                 plt.ylabel("Regret")
                 plt.legend(["training", "validation"])
+                plt.xlabel("Sub epoch")
                 plt.show()
 
         if self.store_result:
