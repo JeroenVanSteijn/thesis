@@ -7,9 +7,11 @@ from MSE_learner import MSE_Learner
 
 # VARIABLES FOR EXPERIMENTS:
 epochs = 30 # number of epochs to train
-penalty_P = 1000 # p value for penalization
-penalty_function_type = "linear_weights" # penalty_function_type = "linear_values"
+penalty_P = 1 # p value for penalization (if relevant)
+penalty_function_type = "linear_values" # penalty_function_type = "linear_values"
 type_of_mirroring = "correlation" # type_of_mirroring = "weight_value_sizes"
+plot_title = "Repair function, on instances with similar correlation to the original experiment"
+
 # END VARIABLES FOR EXPERIMENTS
 
 formatter = "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
@@ -93,7 +95,7 @@ clf = SGD_SPO_dp_lr(
     store_result=True,
     verbose=True,
     plotting=True,
-    plot_title="Penalty function linear in weights with P = 100",
+    plot_title=plot_title,
     plt_show=True,
     penalty_P=penalty_P,
     penalty_function_type=penalty_function_type
