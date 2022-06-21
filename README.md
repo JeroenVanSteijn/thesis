@@ -1,15 +1,28 @@
-# Thesis
+# Predict+optimize for Combinatorial Optimization with uncertainty in the constraints
 
 ## Installation
-
-### Installing spo-online
 
 ```
 make install
 ```
 
-### Running spo-online
+## Running replication experiment
 
 ```
+cd replication
 make run
+```
+
+## Running experiments
+
+```
+cd uncertain-weights
+make run
+```
+
+## Generating instances
+
+```
+cd uncertain-weights
+make generate
 ```

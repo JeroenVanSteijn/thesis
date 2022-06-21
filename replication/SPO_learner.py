@@ -335,47 +335,20 @@ class SGD_SPO_dp_lr:
         if self.plotting:
 
             if validation:
-                plt.subplot(3, 1, 1)
                 plt.plot(
                     subepoch_list, regret_list, subepoch_list, regret_list_validation
                 )
                 plt.title("Learning Curve")
                 plt.ylabel("Regret")
-                plt.ylim(top=np.mean(regret_list) + 5 * np.std(regret_list))
-                plt.legend(["training", "validation"])
-                plt.subplot(3, 1, 2)
-                plt.plot(subepoch_list, loss_list, subepoch_list, loss_list_validation)
-                plt.xlabel("Sub Epochs")
-                plt.ylabel("Loss")
-                plt.yscale("log")
-                plt.legend(["training", "validation"])
-                plt.subplot(3, 1, 3)
-                plt.plot(
-                    subepoch_list,
-                    accuracy_list,
-                    subepoch_list,
-                    accuracy_list_validation,
-                )
-                plt.xlabel("Sub Epochs")
-                plt.ylabel("Accuracy")
                 plt.legend(["training", "validation"])
                 plt.show()
             else:
-                plt.subplot(3, 1, 1)
-                plt.plot(subepoch_list, regret_list)
+                plt.plot(
+                    subepoch_list, regret_list, subepoch_list, regret_list_validation
+                )
                 plt.title("Learning Curve")
                 plt.ylabel("Regret")
-                plt.ylim(top=np.mean(regret_list) + 5 * np.std(regret_list))
-                plt.subplot(3, 1, 2)
-                plt.plot(subepoch_list, loss_list)
-                plt.yscale("log")
-                plt.xlabel("Sub Epochs")
-                plt.ylabel("Loss")
-                plt.subplot(3, 1, 3)
-                plt.plot(subepoch_list, accuracy_list)
-                plt.ylim(bottom=np.median(accuracy_list) - 3 * np.std(accuracy_list))
-                plt.xlabel("Sub Epochs")
-                plt.ylabel("Accuracy")
+                plt.legend(["training", "validation"])
                 plt.show()
 
         if self.store_result:
