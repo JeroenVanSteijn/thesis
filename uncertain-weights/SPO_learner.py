@@ -5,7 +5,7 @@ import matplotlib.pyplot as plt
 from sklearn import preprocessing
 import torch
 from torch import nn, optim
-from learner import LinearRegression, get_kn_indicators, get_objective_value_penalized_infeasibility, get_weights, get_weights_pred, train_fwdbwd_grad, test_fwd
+from learner import LinearRegression, get_kn_indicators, get_objective_value_penalized_infeasibility, get_values, get_weights, get_weights_pred, train_fwdbwd_grad, test_fwd
 import logging
 import datetime
 from collections import defaultdict
@@ -14,7 +14,8 @@ class SGD_SPO_dp_lr:
     def __init__(
         self,
         capacity=None,
-        values=None,
+        values_train=None,
+        values_validation=None,
         epochs=2,
         doScale=True,
         n_items=48,
@@ -31,7 +32,8 @@ class SGD_SPO_dp_lr:
     ):
         self.n_items = n_items
         self.capacity = capacity
-        self.values = values
+        self.values_train = values_train
+        self.values_validation = values_validation
 
         self.hyperparam = hyperparam
         self.epochs = epochs
@@ -59,7 +61,6 @@ class SGD_SPO_dp_lr:
         x_validation=None,
         y_validation=None,
     ):
-        x_train = x_train[:, 1:]  # without group ID
         validation = (x_validation is not None) and (y_validation is not None)
 
         # scale data?
@@ -70,7 +71,6 @@ class SGD_SPO_dp_lr:
         trch_X_train = torch.from_numpy(x_train).float()
         trch_y_train = torch.from_numpy(np.array([y_train]).T).float()
         if validation:
-            x_validation = x_validation[:, 1:]
             if self.doScale:
                 x_validation = self.scaler.transform(x_validation)
             trch_X_validation = torch.from_numpy(x_validation).float()
@@ -95,20 +95,28 @@ class SGD_SPO_dp_lr:
         knaps_V_true = [
             get_weights(trch_y_train, kn_nr, n_items) for kn_nr in range(n_knapsacks)
         ]
+        knaps_values = [
+            get_values(self.values_train, kn_nr, n_items) for kn_nr in range(n_knapsacks)
+        ]
+
         knaps_sol = [
             get_kn_indicators(
                 V_true,
                 capacity,
-                values=self.values,
+                values=knaps_values[nr],
                 true_weights=V_true,
             )
-            for V_true in knaps_V_true
+            for [nr, V_true] in enumerate(knaps_V_true)
         ]
         for k in knaps_sol:
             self.time += k[1]
 
         if validation:
             n_knapsacks_validation = len(trch_X_validation) // n_items
+            knaps_values_validation = [
+                get_values(self.values_validation, kn_nr, n_items)
+                for kn_nr in range(n_knapsacks_validation)
+            ]
             knaps_V_true_validation = [
                 get_weights(trch_y_validation, kn_nr, n_items)
                 for kn_nr in range(n_knapsacks_validation)
@@ -117,10 +125,10 @@ class SGD_SPO_dp_lr:
                 get_kn_indicators(
                     V_true,
                     capacity,
-                    values=self.values,
+                    values=knaps_values_validation[nr],
                     true_weights=V_true,
                 )
-                for V_true in knaps_V_true_validation
+                for [nr, V_true] in enumerate(knaps_V_true_validation)
             ]
             for k in knaps_sol_validation:
                 self.time += k[1]
@@ -150,10 +158,10 @@ class SGD_SPO_dp_lr:
             cnt = 0
             enable_logging = cnt % 20 == 0 and False
             for kn_nr in knapsack_nrs:
-
                 V_true = knaps_V_true[kn_nr]
                 sol_true = knaps_sol[kn_nr][0]
-                optimal_objective_value = np.sum(sol_true * self.values)
+                values_instance = knaps_values[kn_nr]
+                optimal_objective_value = np.sum(sol_true * values_instance)
 
                 # the true-shifted predictions
                 V_pred = get_weights_pred(self.model, trch_X_train, kn_nr, n_items)
@@ -162,24 +170,24 @@ class SGD_SPO_dp_lr:
                 assignments_pred, t = get_kn_indicators(
                     V_pred,
                     capacity,
-                    values=self.values,
+                    values=values_instance,
                     true_weights=V_true,
                     warmstart=sol_true,
                     logging=enable_logging
                 )
                 # Objective value for theta hat
-                sol_pred, _was_penalized = get_objective_value_penalized_infeasibility(assignments_pred, V_true, self.values, capacity, self.penalty_P, self.penalty_function_type)
+                sol_pred, _was_penalized = get_objective_value_penalized_infeasibility(assignments_pred, V_true, values_instance, capacity, self.penalty_P, self.penalty_function_type)
 
                 assignments_spo, t = get_kn_indicators(
                     V_spo,
                     capacity,
-                    values=self.values,
+                    values=values_instance,
                     true_weights=V_true,
                     warmstart=sol_true,
                     logging=enable_logging
                 )
                 # Objective value for 2 * theta hat - theta
-                sol_spo, _was_penalized = get_objective_value_penalized_infeasibility(assignments_spo, V_true, self.values, capacity, self.penalty_P, self.penalty_function_type)
+                sol_spo, _was_penalized = get_objective_value_penalized_infeasibility(assignments_spo, V_true, values_instance, capacity, self.penalty_P, self.penalty_function_type)
                 
                 regret = optimal_objective_value - sol_pred
 
@@ -215,7 +223,7 @@ class SGD_SPO_dp_lr:
                             n_items,
                             capacity,
                             knaps_sol,
-                            values=self.values,
+                            values=self.values_train,
                             penalty_P=self.penalty_P,
                             penalty_function_type=self.penalty_function_type
                         )
@@ -228,7 +236,7 @@ class SGD_SPO_dp_lr:
                                 n_items,
                                 capacity,
                                 knaps_sol_validation,
-                                values=self.values,
+                                values=self.values_validation,
                                 penalty_P=self.penalty_P,
                                 penalty_function_type=self.penalty_function_type
                             )

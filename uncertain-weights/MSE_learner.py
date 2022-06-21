@@ -8,6 +8,7 @@ from torch import nn, optim
 from learner import (
     LinearRegression,
     get_kn_indicators,
+    get_values,
     get_weights,
     test_fwd,
     train_fwdbwd_mse,
@@ -21,7 +22,8 @@ class MSE_Learner:
     def __init__(
         self,
         capacity=None,
-        values=None,
+        values_train=None,
+        values_validation=None,
         epochs=2,
         plt_show=False,
         doScale=True,
@@ -38,7 +40,8 @@ class MSE_Learner:
     ):
         self.n_items = n_items
         self.capacity = capacity
-        self.values = values
+        self.values_train = values_train
+        self.values_validation = values_validation
 
         self.hyperparam = hyperparam
         self.epochs = epochs
@@ -67,7 +70,6 @@ class MSE_Learner:
         x_validation=None,
         y_validation=None,
     ):
-        x_train = x_train[:, 1:]  # without group ID
         validation = (x_validation is not None) and (y_validation is not None)
 
         # scale data?
@@ -78,7 +80,6 @@ class MSE_Learner:
         trch_X_train = torch.from_numpy(x_train).float()
         trch_y_train = torch.from_numpy(np.array([y_train]).T).float()
         if validation:
-            x_validation = x_validation[:, 1:]
             if self.doScale:
                 x_validation = self.scaler.transform(x_validation)
             trch_X_validation = torch.from_numpy(x_validation).float()
@@ -103,20 +104,28 @@ class MSE_Learner:
         knaps_V_true = [
             get_weights(trch_y_train, kn_nr, n_items) for kn_nr in range(n_knapsacks)
         ]
+        knaps_values = [
+            get_values(self.values_train, kn_nr, n_items) for kn_nr in range(n_knapsacks)
+        ]
+        
         knaps_sol = [
             get_kn_indicators(
                 V_true,
                 capacity,
-                values=self.values,
+                values=knaps_values[nr],
                 true_weights=V_true,
             )
-            for V_true in knaps_V_true
+            for [nr, V_true] in enumerate(knaps_V_true)
         ]
         for k in knaps_sol:
             self.time += k[1]
 
         if validation:
             n_knapsacks_validation = len(trch_X_validation) // n_items
+            knaps_values_validation = [
+                get_values(self.values_validation, kn_nr, n_items)
+                for kn_nr in range(n_knapsacks_validation)
+            ]
             knaps_V_true_validation = [
                 get_weights(trch_y_validation, kn_nr, n_items)
                 for kn_nr in range(n_knapsacks_validation)
@@ -125,10 +134,10 @@ class MSE_Learner:
                 get_kn_indicators(
                     V_true,
                     capacity,
-                    values=self.values,
+                    values=knaps_values_validation[nr],
                     true_weights=V_true,
                 )
-                for V_true in knaps_V_true_validation
+                for [nr, V_true] in enumerate(knaps_V_true_validation)
             ]
             for k in knaps_sol_validation:
                 self.time += k[1]
@@ -184,7 +193,7 @@ class MSE_Learner:
                             n_items,
                             capacity,
                             knaps_sol,
-                            values=self.values,
+                            values=self.values_train,
                             penalty_P=self.penalty_P,
                             penalty_function_type=self.penalty_function_type
                         )
@@ -197,7 +206,7 @@ class MSE_Learner:
                                 n_items,
                                 capacity,
                                 knaps_sol_validation,
-                                values=self.values,
+                                values=self.values_validation,
                                 penalty_P=self.penalty_P,
                                 penalty_function_type=self.penalty_function_type
                             )

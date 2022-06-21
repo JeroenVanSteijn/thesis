@@ -7,7 +7,7 @@ from MSE_learner import MSE_Learner
 
 # VARIABLES FOR EXPERIMENTS:
 epochs = 30 # number of epochs to train
-penalty_P = 100 # p value for penalization
+penalty_P = 1000 # p value for penalization
 penalty_function_type = "linear_weights" # penalty_function_type = "linear_values"
 type_of_mirroring = "correlation" # type_of_mirroring = "weight_value_sizes"
 # END VARIABLES FOR EXPERIMENTS

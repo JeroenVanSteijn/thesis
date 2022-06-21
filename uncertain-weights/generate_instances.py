@@ -17,9 +17,9 @@ def generate_instances():
 
         # Generate features that can predict the true weight.
         features = []
-        for i in range(0, 10):
+        for i in range(0, 9):
             newVal = 0
-            if i < 7:
+            if i < 6:
                 newVal = np.round(np.random.normal(weight, i) / (i + 1)).astype(int) # TODO: check if/how we like this linear combination.
                 newVal = (newVal + random.uniform(-1, 1) * noiseSize).astype(int) 
 

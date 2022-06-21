@@ -57,6 +57,11 @@ def get_weights(trch_y, kn_nr, n_items):
     kn_stop = kn_start + n_items
     return trch_y[kn_start:kn_stop].data.numpy().T[0]
 
+def get_values(values, kn_nr, n_items):
+    kn_start = kn_nr * n_items
+    kn_stop = kn_start + n_items
+    return values[kn_start:kn_stop]
+
 def get_weights_pred(model, trch_X, kn_nr, n_items):
     kn_start = kn_nr * n_items
     kn_stop = kn_start + n_items
@@ -127,14 +132,15 @@ def test_fwd(
     # I should probably just slice the trch_y and preds arrays and feed it like that...
     for kn_nr in range(n_knap):
         V_true = get_weights(trch_y, kn_nr, n_items)
+        values_specific = get_values(values, kn_nr, n_items)
         V_pred = get_weights(V_preds, kn_nr, n_items)
         assignments_pred, t = get_kn_indicators(
-            V_pred, c=capacity, values=values, true_weights=V_true
+            V_pred, c=capacity, values=values_specific, true_weights=V_true
         )
         assignments_true = knaps_sol[kn_nr][0]
 
-        optimal_value = np.sum(values * (assignments_true))
-        achieved_value, was_penalized = get_objective_value_penalized_infeasibility(assignments_pred, V_true, values, capacity, penalty_P, penalty_function_type)
+        optimal_value = np.sum(values_specific * (assignments_true))
+        achieved_value, was_penalized = get_objective_value_penalized_infeasibility(assignments_pred, V_true, values_specific, capacity, penalty_P, penalty_function_type)
 
         if was_penalized:
             penalized_count = penalized_count + 1 
