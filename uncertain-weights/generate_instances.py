@@ -2,7 +2,7 @@ import csv
 import random
 import numpy as np
 
-nr_items = 100 # The number of knapsack items to generate
+nr_items = 11376 # The number of knapsack items to generate
 average_weight_value_ratio = 5 # The average in the weight to value ratio (picked from normal distribution)
 variance_weight_value_ratio = 0 # The variance in the weight to value ratio (picked from normal distribution)
 noiseSize = 0 # amount of noise added to each feature

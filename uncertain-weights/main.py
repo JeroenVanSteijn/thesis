@@ -44,7 +44,7 @@ for i in range(0, 48):
         random_values.append(random.randint(0, 600))
 
 epochs = 30
-penalty_P = 1000
+penalty_P = 100
 # penalty_function_type = "linear_values"
 penalty_function_type = "linear_weights"
 
@@ -72,7 +72,7 @@ clf = SGD_SPO_dp_lr(
     store_result=True,
     verbose=True,
     plotting=True,
-    plot_title="SPO vs MSE with penalty function linear in weights",
+    plot_title="Penalty function linear in weights with P = 10",
     plt_show=True,
     penalty_P=penalty_P,
     penalty_function_type=penalty_function_type

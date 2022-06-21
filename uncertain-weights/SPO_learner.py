@@ -348,58 +348,29 @@ class SGD_SPO_dp_lr:
 
             if validation:
                 legend = ["training MSE", "validation MSE", "training SPO", "validation SPO"] if self.plt_show else ["training", "validation"] 
-                plt.subplot(3, 1, 1)
                 plt.plot(
                     subepoch_list, regret_list, subepoch_list, regret_list_validation
                 )
                 plt.title(self.plot_title)
                 plt.ylabel("Regret")
-                plt.ylim(top=np.mean(regret_list) + 5 * np.std(regret_list), bottom=0)
                 plt.legend(legend)
-                plt.subplot(3, 1, 2)
-                plt.plot(subepoch_list, loss_list, subepoch_list, loss_list_validation)
                 plt.xlabel("Sub Epochs")
-                plt.ylabel("Loss")
-                plt.ylim(bottom=0)
-                plt.yscale("log")
-                plt.legend(legend)
-                plt.subplot(3, 1, 3)
-                plt.plot(
-                    subepoch_list,
-                    accuracy_list,
-                    subepoch_list,
-                    accuracy_list_validation,
-                )
-                plt.xlabel("Sub Epochs")
-                plt.ylabel("Accuracy")
-                plt.ylim(bottom=0)
-                plt.legend(legend)
                 if self.plt_show:
                     plt.show()
                 else:
-                    plt.savefig("spo.png")
+                    plt.savefig("mse_plot.png")
             else:
-                plt.subplot(3, 1, 1)
-                plt.plot(subepoch_list, regret_list)
+                plt.plot(
+                    subepoch_list, regret_list, subepoch_list, regret_list
+                )
                 plt.title(self.plot_title)
                 plt.ylabel("Regret")
-                plt.ylim(top=np.mean(regret_list) + 5 * np.std(regret_list), bottom=0)
-                plt.subplot(3, 1, 2)
-                plt.plot(subepoch_list, loss_list)
-                plt.yscale("log")
+                plt.legend(["training", "validation"])
                 plt.xlabel("Sub Epochs")
-                plt.ylabel("Loss")
-                plt.ylim(bottom=0)
-                plt.subplot(3, 1, 3)
-                plt.plot(subepoch_list, accuracy_list)
-                plt.ylim(bottom=np.median(accuracy_list) - 3 * np.std(accuracy_list))
-                plt.xlabel("Sub Epochs")
-                plt.ylabel("Accuracy")
-                plt.ylim(bottom=0)
                 if self.plt_show:
                     plt.show()
                 else:
-                    plt.savefig("spo.png")
+                    plt.savefig("mse_plot.png")
 
         if self.store_result:
             dd = defaultdict(list)
