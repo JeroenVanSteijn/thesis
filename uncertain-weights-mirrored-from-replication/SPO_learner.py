@@ -282,9 +282,10 @@ class SGD_SPO_dp_lr:
                                 "regret_full"
                             ]
                             info["validation_accuracy"] = dict_validation["accuracy"]
-                            info["test_loss"] = dict_test["loss"]
-                            info["test_regret_full"] = dict_test["regret_full"]
-                            info["test_accuracy"] = dict_test["accuracy"]
+                            if test:
+                                info["test_loss"] = dict_test["loss"]
+                                info["test_regret_full"] = dict_test["regret_full"]
+                                info["test_accuracy"] = dict_test["accuracy"]
                             info["subepoch"] = subepoch
                             info["time"] = self.time
                             test_result.append(info)

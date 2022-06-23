@@ -7,10 +7,10 @@ from MSE_learner import MSE_Learner
 
 # VARIABLES FOR EXPERIMENTS:
 epochs = 30 # number of epochs to train
-penalty_P = 2 # p value for penalization (if relevant)
+penalty_P = 10 # p value for penalization (if relevant)
 penalty_function_type = "linear_values" # penalty_function_type = "linear_values"
 type_of_mirroring = "correlation" # type_of_mirroring = "weight_value_sizes"
-plot_title = "Penalty linear in weights, on instances with similar correlation to the original experiment, P = 2"
+plot_title = "Penalty linear in values, on instances with similar correlation to the original experiment, P = 10"
 
 # END VARIABLES FOR EXPERIMENTS
 
@@ -84,7 +84,7 @@ clf = MSE_Learner(
     penalty_function_type=penalty_function_type
 )
 pdf = clf.fit(
-    X_1gtrain, y_train, X_1gvalidation, y_validation, X_1gtest, y_test
+    X_1gtrain, y_train, X_1gvalidation, y_validation
 )
 
 clf = SGD_SPO_dp_lr(
@@ -101,7 +101,7 @@ clf = SGD_SPO_dp_lr(
     penalty_function_type=penalty_function_type
 )
 pdf = clf.fit(
-    X_1gtrain, y_train, X_1gvalidation, y_validation, X_1gtest, y_test
+    X_1gtrain, y_train, X_1gvalidation, y_validation
 )
 print(pdf.head())
 
