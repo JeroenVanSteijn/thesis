@@ -1,6 +1,7 @@
 import logging
 from torch import optim
 import numpy as np
+from MSE_learner import MSE_learner
 from SPO_learner import SGD_SPO_dp_lr
 
 formatter = "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
@@ -20,7 +21,18 @@ weights = np.array(weights)
 
 clf = SGD_SPO_dp_lr(
     weights=weights,
-    epochs=10,
+    epochs=15,
+    optimizer=optim.Adam,
+    capacity=[60],
+    store_result=True,
+    verbose=True,
+    plotting=True,
+)
+pdf = clf.fit(X_1gtrain, y_train, X_1gvalidation, y_validation, X_1gtest, y_test)
+
+clf = MSE_learner(
+    weights=weights,
+    epochs=15,
     optimizer=optim.Adam,
     capacity=[60],
     store_result=True,

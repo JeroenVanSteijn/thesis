@@ -52,6 +52,15 @@ def train_fwdbwd_grad(model, optimizer, sub_X_train, sub_y_train, grad):
 
     optimizer.step()
 
+def train_prediction_error(model, optimizer, sub_X_train, sub_y_train):
+    inputs = Variable(sub_X_train, requires_grad=True)
+    out = model(inputs)
+    optimizer.zero_grad()
+    criterion = nn.MSELoss()
+    loss = criterion(out, sub_y_train)
+    loss.backward()
+    optimizer.step()
+
 def test_fwd(
     model,
     criterion,

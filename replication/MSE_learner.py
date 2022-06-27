@@ -11,7 +11,7 @@ from learner import (
     get_kn_indicators,
     get_profits,
     get_profits_pred,
-    train_fwdbwd_grad,
+    train_prediction_error,
     test_fwd,
 )
 import logging
@@ -19,7 +19,7 @@ import datetime
 from collections import defaultdict
 
 
-class SGD_SPO_dp_lr:
+class MSE_learner:
     def __init__(
         self,
         capacity=None,
@@ -180,46 +180,14 @@ class SGD_SPO_dp_lr:
             random.shuffle(knapsack_nrs)  # randomly shuffle order of training
             cnt = 0
             for kn_nr in knapsack_nrs:
-
-                V_true = knaps_V_true[kn_nr]
-                sol_true = knaps_sol[kn_nr][0]
-
-                # the true-shifted predictions
-                V_pred = get_profits_pred(self.model, trch_X_train, kn_nr, n_items)
-                V_spo = 2 * V_pred - V_true
-
-                sol_spo, t = get_kn_indicators(
-                    V_spo,
-                    capacity,
-                    warmstart=sol_true,
-                    weights=self.weights,
-                )  # Question -> only 0's?, in all replication?
-
-                grad = (
-                    sol_spo - sol_true
-                )  # Question -> can (2 * V_pred - V_true) 0 V_true also be a grad? Not in paper?
-
-                if self.degree == 2:
-                    sol_pred, t = get_kn_indicators(
-                        V_pred,
-                        capacity,
-                        weights=self.weights,
-                    )
-                    reg = sum(
-                        (sol_true - sol_pred) * V_true
-                    )  # Question: why not sol_spo - sol_pred??
-                    grad = reg * grad
-                self.time += t
-
                 ### what if for the whole 48 items at a time
                 kn_start = kn_nr * n_items
                 kn_stop = kn_start + n_items
-                train_fwdbwd_grad(
+                train_prediction_error(
                     self.model,
                     optimizer,
                     trch_X_train[kn_start:kn_stop],
-                    trch_y_train[kn_start:kn_stop],
-                    torch.from_numpy(np.array([grad]).T).float(),
+                    trch_y_train[kn_start:kn_stop]
                 )
 
                 if self.verbose or self.plotting or self.store_result:
@@ -344,6 +312,11 @@ class SGD_SPO_dp_lr:
                 plt.plot(
                     subepoch_list, regret_list_test
                 )
+                plt.title("Learning Curve")
+                plt.ylabel("Regret")
+                plt.xlabel("Sub epoch")
+                plt.legend(["SPO-full", "MSE"])
+                plt.show()
 
             elif validation:
                 plt.plot(
