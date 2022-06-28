@@ -41,6 +41,9 @@ def get_objective_value_penalized_infeasibility(assignments, true_weights, value
 
                 elif penalty_function_type == "linear_values":
                     total_value -= values[index] * penalty_P
+
+                elif penalty_function_type == "repair":
+                    total_value -= values[index]
                 
                 else:
                     raise Exception("Invalid penalty function type.")

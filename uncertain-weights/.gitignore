@@ -8,4 +8,7 @@ __pycache__
 */__pycache__/*
 __pycache__/*
 ./results/*
+./results/*/*.py
+./results/**
+./results/*/**
 ./instances/*

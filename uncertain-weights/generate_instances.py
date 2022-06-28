@@ -5,7 +5,7 @@ import numpy as np
 nr_items = 11376 # The number of knapsack items to generate
 average_weight_value_ratio = 5 # The average in the weight to value ratio (picked from normal distribution)
 variance_weight_value_ratio = 0 # The variance in the weight to value ratio (picked from normal distribution)
-noiseSize = 0 # amount of noise added to each feature
+noiseSize = 10 # amount of noise added to each feature
 max_value = 50 # The maximum value for 1 item (picked randomly for interval 0 - max, evenly distributed)
 
 def generate_instances():
@@ -38,7 +38,7 @@ def generate_instances():
     return result
 
 def main():
-    f = open('./instances/1.csv', 'w')
+    f = open('./instances/10_noise.csv', 'w')
     writer = csv.writer(f)
     instances = generate_instances()
     header = ["feature_0", "feature_1", "feature_2", "feature_3", "feature_4", "feature_5", "feature_6", "feature_7", "feature_8", "value", "true_weight"]

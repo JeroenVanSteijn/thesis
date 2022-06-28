@@ -2,8 +2,8 @@ import os
 import pandas as pd
 from matplotlib import pyplot as plt
 
-title = "Penalty function linear in values on instances generated with no noise and P = 10"
-folder = "./results/28-06/"
+title = "Penalty function linear in values on instances generated with 10 noise"
+folder = "./results/28-06_10_noise_multi_p/"
 use_subepoch = False # If true we plot epochs (less detailed)
 
 def plot():

@@ -2,7 +2,7 @@ import random
 import numpy as np
 from sklearn import preprocessing
 import torch
-from torch import nn, optim
+from torch import nn
 from csv_writer import write_results
 from learner import LinearRegression, get_kn_indicators, get_objective_value_penalized_infeasibility, get_values, get_weights, get_weights_pred, train_fwdbwd_grad, test_fwd
 
@@ -17,6 +17,7 @@ class SGD_SPO_dp_lr:
         optimizer,
         penalty_P,
         penalty_function_type,
+        repair_in_validation,
         file_name,
     ):
         self.n_items = n_items
@@ -28,6 +29,7 @@ class SGD_SPO_dp_lr:
         self.best_params_ = {"p": "default"}
         self.penalty_P = penalty_P
         self.penalty_function_type = penalty_function_type
+        self.repair_in_validation = repair_in_validation
         self.file_name = file_name
 
     def fit(
@@ -157,7 +159,7 @@ class SGD_SPO_dp_lr:
                         knaps_sol,
                         values=self.values_train,
                         penalty_P=self.penalty_P,
-                        penalty_function_type=self.penalty_function_type
+                        penalty_function_type="repair" if self.repair_in_validation else self.penalty_function_type
                     )
                     dict_validation = test_fwd(
                         self.model,
@@ -169,7 +171,7 @@ class SGD_SPO_dp_lr:
                         knaps_sol_validation,
                         values=self.values_validation,
                         penalty_P=self.penalty_P,
-                        penalty_function_type=self.penalty_function_type
+                        penalty_function_type="repair" if self.repair_in_validation else self.penalty_function_type
                     )
 
                     info = {}

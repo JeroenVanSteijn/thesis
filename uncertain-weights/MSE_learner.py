@@ -24,6 +24,7 @@ class MSE_Learner:
         optimizer,
         penalty_P,
         penalty_function_type,
+        repair_in_validation,
         file_name,
     ):
         self.n_items = n_items
@@ -35,6 +36,7 @@ class MSE_Learner:
         self.best_params_ = {"p": "default"}
         self.penalty_P = penalty_P
         self.penalty_function_type = penalty_function_type
+        self.repair_in_validation = repair_in_validation
         self.file_name = file_name
 
     def fit(
@@ -134,7 +136,7 @@ class MSE_Learner:
                         knaps_sol,
                         values=self.values_train,
                         penalty_P=self.penalty_P,
-                        penalty_function_type=self.penalty_function_type
+                        penalty_function_type="repair" if self.repair_in_validation else self.penalty_function_type
                     )
                     dict_validation = test_fwd(
                         self.model,
@@ -146,7 +148,7 @@ class MSE_Learner:
                         knaps_sol_validation,
                         values=self.values_validation,
                         penalty_P=self.penalty_P,
-                        penalty_function_type=self.penalty_function_type
+                        penalty_function_type="repair" if self.repair_in_validation else self.penalty_function_type
                     )
 
                     info = {}

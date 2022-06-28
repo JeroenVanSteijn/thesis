@@ -4,7 +4,7 @@ from MSE_learner import MSE_Learner
 import csv
 
 # Experiment variables
-epochs = 50
+epochs = 100
 penalty_P = 10
 penalty_function_type = "linear_values" # "linear_values"
 # End experiment variables
@@ -12,7 +12,7 @@ penalty_function_type = "linear_values" # "linear_values"
 x_train, y_train, values_train, x_validation, y_validation, values_validation = [[],[],[],[],[],[]]
 
 # Reading and formatting instance
-instance_file = './instances/1.csv'
+instance_file = './instances/10_noise.csv'
 file = open(instance_file)
 nr_items = len(file.readlines())
 
@@ -38,6 +38,7 @@ with open(instance_file) as csv_file:
             x_train.append(features)
             y_train.append(true_weight)
             values_train.append(value)
+
         # validation set is size 25%
         else:
             x_validation.append(features)
@@ -52,9 +53,42 @@ learner = MSE_Learner(
     optimizer=optim.Adam,
     capacity=[60],
     n_items=48,
-    penalty_P=penalty_P,
+    penalty_P=1,
     penalty_function_type=penalty_function_type,
-    file_name="./results/28-06/mse_learner.py",
+    repair_in_validation=True,
+    file_name="./results/28-06_10_noise_multi_p/mse_learner_p1.py",
+)
+learner.fit(
+    x_train, y_train, x_validation, y_validation
+)
+
+learner = MSE_Learner(
+    values_train=values_train,
+    values_validation=values_validation,
+    epochs=epochs,
+    optimizer=optim.Adam,
+    capacity=[60],
+    n_items=48,
+    penalty_P=2,
+    penalty_function_type=penalty_function_type,
+    repair_in_validation=True,
+    file_name="./results/28-06_10_noise_multi_p/mse_learner_p2.py",
+)
+learner.fit(
+    x_train, y_train, x_validation, y_validation
+)
+
+learner = MSE_Learner(
+    values_train=values_train,
+    values_validation=values_validation,
+    epochs=epochs,
+    optimizer=optim.Adam,
+    capacity=[60],
+    n_items=48,
+    penalty_P=10,
+    penalty_function_type=penalty_function_type,
+    repair_in_validation=True,
+    file_name="./results/28-06_10_noise_multi_p/mse_learner_p10.py",
 )
 learner.fit(
     x_train, y_train, x_validation, y_validation
@@ -65,12 +99,46 @@ learner = SGD_SPO_dp_lr(
     values_validation=values_validation,
     epochs=epochs,
     optimizer=optim.Adam,
-        n_items=48,
+    n_items=48,
     capacity=[60],
-    penalty_P=penalty_P,
+    penalty_P=1,
     penalty_function_type=penalty_function_type,
-    file_name="./results/28-06/spo_learner.py",
+    repair_in_validation=True,
+    file_name="./results/28-06_10_noise_multi_p/spo_learner_p1.py",
 )
 learner.fit(
     x_train, y_train, x_validation, y_validation
 )
+
+learner = SGD_SPO_dp_lr(
+    values_train=values_train,
+    values_validation=values_validation,
+    epochs=epochs,
+    optimizer=optim.Adam,
+    n_items=48,
+    capacity=[60],
+    penalty_P=2,
+    penalty_function_type=penalty_function_type,
+    repair_in_validation=True,
+    file_name="./results/28-06_10_noise_multi_p/spo_learner_p2.py",
+)
+learner.fit(
+    x_train, y_train, x_validation, y_validation
+)
+
+learner = SGD_SPO_dp_lr(
+    values_train=values_train,
+    values_validation=values_validation,
+    epochs=epochs,
+    optimizer=optim.Adam,
+    n_items=48,
+    capacity=[60],
+    penalty_P=10,
+    penalty_function_type=penalty_function_type,
+    repair_in_validation=True,
+    file_name="./results/28-06_10_noise_multi_p/spo_learner_p10.py",
+)
+learner.fit(
+    x_train, y_train, x_validation, y_validation
+)
+
