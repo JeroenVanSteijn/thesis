@@ -1,18 +1,12 @@
-import logging
 from torch import optim
-import numpy as np
 from SPO_learner import SGD_SPO_dp_lr
 from MSE_learner import MSE_Learner
 import csv
 
-formatter = "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
-logging.basicConfig(filename="knapsackRunner.log", level=logging.INFO, format=formatter)
-
 # Experiment variables
-plot_title = "Penalty function linear in values with P = 10, generated instances"
-epochs = 30
-penalty_P = 100
-penalty_function_type = "linear_weights" # "linear_values"
+epochs = 50
+penalty_P = 10
+penalty_function_type = "linear_values" # "linear_values"
 # End experiment variables
 
 x_train, y_train, values_train, x_validation, y_validation, values_validation = [[],[],[],[],[],[]]
@@ -38,7 +32,8 @@ with open(instance_file) as csv_file:
         features = features_ints + features_floats
         value = int(row[9])
         true_weight = int(row[10])
-        # test set is size 75%
+
+        # training set is size 75%
         if line_count < nr_items * 0.75:
             x_train.append(features)
             y_train.append(true_weight)
@@ -49,42 +44,33 @@ with open(instance_file) as csv_file:
             y_validation.append(true_weight)
             values_validation.append(value)
 
-# Starting learners
+# Running learners
 learner = MSE_Learner(
     values_train=values_train,
     values_validation=values_validation,
     epochs=epochs,
     optimizer=optim.Adam,
     capacity=[60],
-    store_result=True,
-    verbose=True,
-    plotting=True,
-    plot_title="MSE",
+    n_items=48,
     penalty_P=penalty_P,
-    penalty_function_type=penalty_function_type
+    penalty_function_type=penalty_function_type,
+    file_name="./results/28-06/mse_learner.py",
 )
-run = learner.fit(
+learner.fit(
     x_train, y_train, x_validation, y_validation
 )
-print(run.head())
 
 learner = SGD_SPO_dp_lr(
     values_train=values_train,
     values_validation=values_validation,
     epochs=epochs,
     optimizer=optim.Adam,
+        n_items=48,
     capacity=[60],
-    store_result=True,
-    verbose=True,
-    plotting=True,
-    plot_title=plot_title,
-    plt_show=True,
     penalty_P=penalty_P,
-    penalty_function_type=penalty_function_type
+    penalty_function_type=penalty_function_type,
+    file_name="./results/28-06/spo_learner.py",
 )
-run2 = learner.fit(
+learner.fit(
     x_train, y_train, x_validation, y_validation
 )
-print(run2.head())
-
-np.set_printoptions(suppress=True, threshold=1000000)

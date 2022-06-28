@@ -15,7 +15,7 @@ class LinearRegression(nn.Module):
         return out
 
 def get_kn_indicators(
-    V_pred, c, values, true_weights, warmstart=None, logging=False
+    V_pred, c, values, warmstart=None
 ):
     solution = solveKnapsackProblem([V_pred.astype(int).tolist()], values, c, warmstart=warmstart)
     assignments = np.asarray(solution["assignments"])
@@ -135,7 +135,7 @@ def test_fwd(
         values_specific = get_values(values, kn_nr, n_items)
         V_pred = get_weights(V_preds, kn_nr, n_items)
         assignments_pred, t = get_kn_indicators(
-            V_pred, c=capacity, values=values_specific, true_weights=V_true
+            V_pred, c=capacity, values=values_specific
         )
         assignments_true = knaps_sol[kn_nr][0]
 

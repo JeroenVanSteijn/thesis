@@ -3,3 +3,6 @@ run:
 
 generate:
 	python3 ./generate_instances.py
+
+plot:
+	python3 ./plot.py
