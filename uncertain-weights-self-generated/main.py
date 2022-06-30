@@ -5,16 +5,15 @@ import csv
 
 # Experiment variables
 epochs = 100
-penalty_P = 10
 penalty_function_type = "linear_values" # "linear_values"
-folder = "./results/30-06_1000_noise_multi_p"
+folder = "./results/30-06_random_noise_multi_p-test-loss"
 
 # End experiment variables
 
 x_train, y_train, values_train, x_validation, y_validation, values_validation = [[],[],[],[],[],[]]
 
 # Reading and formatting instance
-instance_file = './instances/1000_noise.csv'
+instance_file = './instances/random_noise.csv'
 file = open(instance_file)
 nr_items = len(file.readlines())
 

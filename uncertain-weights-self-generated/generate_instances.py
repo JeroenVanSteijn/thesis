@@ -7,8 +7,8 @@ average_weight_value_ratio = 5 # The average in the weight to value ratio (picke
 variance_weight_value_ratio = 0 # The variance in the weight to value ratio (picked from normal distribution)
 noiseSize = 1000 # amount of noise added to each feature
 max_value = 50 # The maximum value for 1 item (picked randomly for interval 0 - max, evenly distributed)
-
-filename = str(noiseSize) + "_noise.csv"
+random_features = True
+filename = "random_noise.csv"
 
 def generate_instances():
     result = []
@@ -22,12 +22,18 @@ def generate_instances():
         for i in range(0, 9):
             newVal = 0
             if i < 6:
-                newVal = np.round(np.random.normal(weight, i) / (i + 1)).astype(int) # TODO: check if/how we like this linear combination.
-                newVal = (newVal + random.uniform(-1, 1) * noiseSize).astype(int) 
+                if random_features:
+                    newVal = random.randint(0, 100)
+                else:
+                    newVal = np.round(np.random.normal(weight, i) / (i + 1)).astype(int) # TODO: check if/how we like this linear combination.
+                    newVal = (newVal + random.uniform(-1, 1) * noiseSize).astype(int) 
 
             else:
-                newVal = np.random.normal(weight, i) # TODO: check if/how we like this linear combination.
-                newVal = newVal + random.uniform(-1, 1) * noiseSize
+                if random_features:
+                    newVal = random.random()
+                else:
+                    newVal = np.random.normal(weight, i) # TODO: check if/how we like this linear combination.
+                    newVal = newVal + random.uniform(-1, 1) * noiseSize
             
 
             features.append(newVal)

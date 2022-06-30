@@ -3,8 +3,8 @@ import numpy as np
 import pandas as pd
 from matplotlib import pyplot as plt
 
-title = "Penalty function linear in values on instances generated with 10 noise"
-folder = "./results/29-06_10_noise_multi_p/"
+title = "Penalty function linear in values on instances generated with random features"
+folder = "./results/30-06_random_noise_multi_p/"
 use_subepoch = False # If true we plot epochs (less detailed)
 plot_training = False # If true also plot the training curve
 
