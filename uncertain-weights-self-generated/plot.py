@@ -4,7 +4,7 @@ import pandas as pd
 from matplotlib import pyplot as plt
 
 title = "Penalty function linear in values on instances generated with 0.1 noise"
-folder = "./results/01-07_0.1_noise_multi_p_linear_values/"
+folder = "./results/04-07_0.1_noise_multi_p_linear_values_reject_in_validation/"
 use_subepoch = False # If true we plot epochs (less detailed)
 plot_training = False # If true also plot the training curve
 

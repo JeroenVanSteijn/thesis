@@ -5,8 +5,8 @@ import csv
 
 # Experiment variables
 epochs = 100
-penalty_function_type = "linear_weights" # "linear_values"
-folder = "./results/01-07_no_noise_multi_p_linear_weights"
+penalty_function_type = "linear_values" # "linear_weights"
+folder = "./results/04-07_0.1_noise_multi_p_linear_values_reject_in_validation/"
 
 # End experiment variables
 
@@ -56,7 +56,7 @@ learner = MSE_Learner(
     n_items=48,
     penalty_P=1,
     penalty_function_type=penalty_function_type,
-    repair_in_validation=True,
+    reject_in_validation=True,
     file_name=folder + "/mse_learner.py",
 )
 learner.fit(
@@ -72,7 +72,7 @@ learner = SGD_SPO_dp_lr(
     capacity=[60],
     penalty_P=1,
     penalty_function_type=penalty_function_type,
-    repair_in_validation=True,
+    reject_in_validation=True,
     file_name=folder+"/spo_learner_p1.py",
 )
 learner.fit(
@@ -88,7 +88,7 @@ learner = SGD_SPO_dp_lr(
     capacity=[60],
     penalty_P=2,
     penalty_function_type=penalty_function_type,
-    repair_in_validation=True,
+    reject_in_validation=True,
     file_name=folder+"/spo_learner_p2.py",
 )
 learner.fit(
@@ -104,7 +104,7 @@ learner = SGD_SPO_dp_lr(
     capacity=[60],
     penalty_P=10,
     penalty_function_type=penalty_function_type,
-    repair_in_validation=True,
+    reject_in_validation=True,
     file_name=folder+"/spo_learner_p10.py",
 )
 learner.fit(
@@ -121,7 +121,7 @@ learner = SGD_SPO_dp_lr(
     capacity=[60],
     penalty_P=100,
     penalty_function_type=penalty_function_type,
-    repair_in_validation=True,
+    reject_in_validation=True,
     file_name=folder+"/spo_learner_p100.py",
 )
 learner.fit(
@@ -138,7 +138,7 @@ learner = SGD_SPO_dp_lr(
     capacity=[60],
     penalty_P=100,
     penalty_function_type=penalty_function_type,
-    repair_in_validation=True,
+    reject_in_validation=True,
     file_name=folder+"/spo_learner_p1000.py",
 )
 learner.fit(

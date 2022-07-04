@@ -17,7 +17,7 @@ class SGD_SPO_dp_lr:
         optimizer,
         penalty_P,
         penalty_function_type,
-        repair_in_validation,
+        reject_in_validation,
         file_name,
     ):
         self.n_items = n_items
@@ -29,7 +29,7 @@ class SGD_SPO_dp_lr:
         self.best_params_ = {"p": "default"}
         self.penalty_P = penalty_P
         self.penalty_function_type = penalty_function_type
-        self.repair_in_validation = repair_in_validation
+        self.reject_in_validation = reject_in_validation
         self.file_name = file_name
 
     def fit(
@@ -109,31 +109,19 @@ class SGD_SPO_dp_lr:
                 V_true = knaps_V_true[kn_nr]
                 sol_true = knaps_sol[kn_nr][0]
                 values_instance = knaps_values[kn_nr]
-                optimal_objective_value = np.sum(sol_true * values_instance)
 
-                # the true-shifted predictions
+                # SPO+ gradient
                 V_pred = get_weights_pred(self.model, trch_X_train, kn_nr, n_items)
                 V_spo = 2 * V_pred - V_true
-
-                assignments_pred, t = get_kn_indicators(
-                    V_pred,
-                    capacity,
-                    values=values_instance,
-                    warmstart=sol_true
-                )
-                # Objective value for theta hat
-                sol_pred, _was_penalized = get_objective_value_penalized_infeasibility(assignments_pred, V_true, values_instance, capacity, self.penalty_P, self.penalty_function_type)
-
+                
                 assignments_spo, t = get_kn_indicators(
                     V_spo,
                     capacity,
-                    values=values_instance,
-                    warmstart=sol_true
+                    values=values_instance
                 )
                 # Objective value for 2 * theta hat - theta
                 sol_spo, _was_penalized = get_objective_value_penalized_infeasibility(assignments_spo, V_true, values_instance, capacity, self.penalty_P, self.penalty_function_type)
-                regret = optimal_objective_value - sol_pred
-                grad = regret * (sol_spo - sol_true)
+                grad = (sol_spo - sol_true)
                 
                 ### what if for the whole 48 items at a time
                 kn_start = kn_nr * n_items
@@ -159,7 +147,7 @@ class SGD_SPO_dp_lr:
                         knaps_sol,
                         values=self.values_train,
                         penalty_P=self.penalty_P,
-                        penalty_function_type="repair" if self.repair_in_validation else self.penalty_function_type
+                        penalty_function_type="reject" if self.reject_in_validation else self.penalty_function_type
                     )
                     dict_validation = test_fwd(
                         self.model,
@@ -171,7 +159,7 @@ class SGD_SPO_dp_lr:
                         knaps_sol_validation,
                         values=self.values_validation,
                         penalty_P=self.penalty_P,
-                        penalty_function_type="repair" if self.repair_in_validation else self.penalty_function_type
+                        penalty_function_type="reject" if self.reject_in_validation else self.penalty_function_type
                     )
 
                     info = {}
