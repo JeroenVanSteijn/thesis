@@ -10,8 +10,8 @@ from MSE_learner import MSE_Learner
 epochs = 50 # number of epochs to train
 penalty_P = 2 # p value for penalization (if relevant)
 penalty_function_type = "linear_values" # penalty_function_type = "linear_values"
-type_of_mirroring = "correlation" # type_of_mirroring = "weight_value_sizes"
-plot_title = "Penalty linear in values, on instances with similar correlation to the original experiment"
+type_of_mirroring = "weight_value_sizes" # type_of_mirroring = "correlation"
+plot_title = "Penalty linear in values, on instances with similar weights and values to the original experiment"
 
 # END VARIABLES FOR EXPERIMENTS
 

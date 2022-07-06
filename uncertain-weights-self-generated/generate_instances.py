@@ -5,16 +5,16 @@ import numpy as np
 nr_items = 11376 # The number of knapsack items to generate
 average_weight_value_ratio = 5 # The average in the weight to value ratio (picked from normal distribution)
 variance_weight_value_ratio = 0 # The variance in the weight to value ratio (picked from normal distribution)
-noiseSize = 0.1 # amount of noise added to each feature
+noiseSize = 0.001 # amount of noise added to each feature
 max_value = 50 # The maximum value for 1 item (picked randomly for interval 0 - max, evenly distributed)
 random_features = True
-filename = "0.1_noise.csv"
+filename = "0.001_noise.csv"
 
 def generate_instances():
     result = []
     for _ in range(0, nr_items):
         value = random.randint(0, max_value)
-        weight_value_ratio = np.round(np.random.normal(average_weight_value_ratio, variance_weight_value_ratio))
+        weight_value_ratio = min(0.1, np.random.normal(average_weight_value_ratio, variance_weight_value_ratio))
         weight = np.round(value / weight_value_ratio).astype(int)
 
         # Generate features that can predict the true weight.
