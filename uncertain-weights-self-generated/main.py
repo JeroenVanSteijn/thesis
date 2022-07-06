@@ -6,14 +6,14 @@ import csv
 # Experiment variables
 epochs = 100
 penalty_function_type = "linear_values" # "linear_weights"
-folder = "./results/06-07_0.001_noise_multi_p_linear_values_p2_in_validation/"
+folder = "./results/06-07_0.01_noise_multi_p_linear_values_reject_in_validation/"
 
 # End experiment variables
 
 x_train, y_train, values_train, x_validation, y_validation, values_validation = [[],[],[],[],[],[]]
 
 # Reading and formatting instance
-instance_file = './instances/0.001_noise.csv'
+instance_file = './instances/0.01_noise.csv'
 file = open(instance_file)
 nr_items = len(file.readlines())
 
