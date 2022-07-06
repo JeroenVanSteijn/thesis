@@ -318,11 +318,10 @@ class MSE_Learner:
 
             if validation:
                 plt.plot(
-                    subepoch_list, regret_list, subepoch_list, regret_list_validation
+                    subepoch_list, regret_list_validation
                 )
                 plt.title(self.plot_title)
                 plt.ylabel("Regret")
-                plt.legend(["training", "validation"])
                 plt.xlabel("Sub Epochs")
                 if self.plt_show:
                     plt.show()

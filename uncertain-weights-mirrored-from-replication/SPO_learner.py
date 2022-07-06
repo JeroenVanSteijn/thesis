@@ -63,7 +63,7 @@ class SGD_SPO_dp_lr:
     ):
         x_train = x_train[:, 1:]  # without group ID
         validation = (x_validation is not None) and (y_validation is not None)
-        test = (x_test is not None) and (y_test is not None)
+        test = (x_test is not None) and (y_test is not None) and False # Test is disabled.
 
         # scale data?
         if self.doScale:
@@ -348,13 +348,11 @@ class SGD_SPO_dp_lr:
         if self.plotting:
 
             if validation:
-                legend = ["training MSE", "validation MSE", "training SPO", "validation SPO"] if self.plt_show else ["training", "validation"] 
                 plt.plot(
-                    subepoch_list, regret_list, subepoch_list, regret_list_validation
+                    subepoch_list, regret_list_validation
                 )
                 plt.title(self.plot_title)
                 plt.ylabel("Regret")
-                plt.legend(legend)
                 plt.xlabel("Sub Epochs")
                 if self.plt_show:
                     plt.show()

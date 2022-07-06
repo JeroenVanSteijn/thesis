@@ -134,7 +134,8 @@ def test_fwd(
         assignments_true = knaps_sol[kn_nr][0]
 
         optimal_value = np.sum(values * (assignments_true))
-        achieved_value, was_penalized = get_objective_value_penalized_infeasibility(assignments_pred, V_true, values, capacity, penalty_P, penalty_function_type)
+        # Always evaluate on P=2.
+        achieved_value, was_penalized = get_objective_value_penalized_infeasibility(assignments_pred, V_true, values, capacity, 2, penalty_function_type)
 
         if was_penalized:
             penalized_count = penalized_count + 1 

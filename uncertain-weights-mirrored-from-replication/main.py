@@ -1,16 +1,17 @@
 import logging
 import random
+from matplotlib import pyplot as plt
 from torch import optim
 import numpy as np
 from SPO_learner import SGD_SPO_dp_lr
 from MSE_learner import MSE_Learner
 
 # VARIABLES FOR EXPERIMENTS:
-epochs = 30 # number of epochs to train
-penalty_P = 10 # p value for penalization (if relevant)
+epochs = 50 # number of epochs to train
+penalty_P = 2 # p value for penalization (if relevant)
 penalty_function_type = "linear_values" # penalty_function_type = "linear_values"
 type_of_mirroring = "correlation" # type_of_mirroring = "weight_value_sizes"
-plot_title = "Penalty linear in values, on instances with similar correlation to the original experiment, P = 10"
+plot_title = "Penalty linear in values, on instances with similar correlation to the original experiment"
 
 # END VARIABLES FOR EXPERIMENTS
 
@@ -96,13 +97,65 @@ clf = SGD_SPO_dp_lr(
     verbose=True,
     plotting=True,
     plot_title=plot_title,
-    plt_show=True,
-    penalty_P=penalty_P,
+    plt_show=False,
+    penalty_P=2,
     penalty_function_type=penalty_function_type
 )
 pdf = clf.fit(
     X_1gtrain, y_train, X_1gvalidation, y_validation
 )
-print(pdf.head())
 
-np.set_printoptions(suppress=True, threshold=1000000)
+clf = SGD_SPO_dp_lr(
+    values=random_values,
+    epochs=epochs,
+    optimizer=optim.Adam,
+    capacity=[60],
+    store_result=True,
+    verbose=True,
+    plotting=True,
+    plot_title=plot_title,
+    plt_show=False,
+    penalty_P=10,
+    penalty_function_type=penalty_function_type
+)
+pdf = clf.fit(
+    X_1gtrain, y_train, X_1gvalidation, y_validation
+)
+
+clf = SGD_SPO_dp_lr(
+    values=random_values,
+    epochs=epochs,
+    optimizer=optim.Adam,
+    capacity=[60],
+    store_result=True,
+    verbose=True,
+    plotting=True,
+    plot_title=plot_title,
+    plt_show=False,
+    penalty_P=100,
+    penalty_function_type=penalty_function_type
+)
+pdf = clf.fit(
+    X_1gtrain, y_train, X_1gvalidation, y_validation
+)
+
+clf = SGD_SPO_dp_lr(
+    values=random_values,
+    epochs=epochs,
+    optimizer=optim.Adam,
+    capacity=[60],
+    store_result=True,
+    verbose=True,
+    plotting=True,
+    plot_title=plot_title,
+    plt_show=False,
+    penalty_P=1000,
+    penalty_function_type=penalty_function_type
+)
+pdf = clf.fit(
+    X_1gtrain, y_train, X_1gvalidation, y_validation
+)
+
+plt.title(plot_title)
+plt.legend(["MSE", "spo_p_2", "spo_p_10", "spo_p_100", "spo_p_1000"])
+plt.show()
