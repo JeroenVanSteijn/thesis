@@ -5,8 +5,8 @@ import csv
 
 # Experiment variables
 epochs = 100
-penalty_function_type = "linear_values" # "linear_weights"
-folder = "./results/04-07_0.1_noise_multi_p_linear_values_reject_in_validation/"
+penalty_function_type = "linear_weights" # "linear_values"
+folder = "./results/04-07_0.1_noise_multi_p_linear_weights_p2_in_validation/"
 
 # End experiment variables
 
