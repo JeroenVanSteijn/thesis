@@ -18,7 +18,7 @@ enable_generate_instances_around_weight = False # My approach
 def generate_instances_around_weight():
     result = []
     for _ in range(0, nr_items):
-        value = random.randint(0, max_value)
+        value = random.randint(min_value, max_value)
         weight_value_ratio = max(0.1, np.random.normal(average_weight_value_ratio, variance_weight_value_ratio))
         weight = np.round(value / weight_value_ratio).astype(int)
 
