@@ -6,16 +6,16 @@ import csv
 # Experiment variables
 epochs = 100
 penalty_function_type = "linear_values" # "linear_weights"
-folder = "./results/12-07_multi_realization/"
+folder = "./results/13-07_linear_combination_no_noise/"
 
 # End experiment variables
-capacity = 15 #60
-n_items = 3 #48
+capacity = 60 # 60 is default
+n_items = 48 # 48 is default
 
 x_train, y_train, values_train, x_validation, y_validation, values_validation = [[],[],[],[],[],[]]
 
 # Reading and formatting instance
-instance_file = './instances/multi_realization.csv'
+instance_file = './instances/linear_combination_1.csv'
 file = open(instance_file)
 nr_items = len(file.readlines())
 
@@ -90,7 +90,7 @@ learner = SGD_SPO_dp_lr(
     optimizer=optim.Adam,
     n_items=n_items,
     capacity=[capacity],
-    penalty_P=100,
+    penalty_P=1000,
     penalty_function_type=penalty_function_type,
     reject_in_validation=True,
     file_name=folder+"/spo_learner_p1000.py",
