@@ -3,8 +3,8 @@ import numpy as np
 import pandas as pd
 from matplotlib import pyplot as plt
 
-title = "Multi realization reject infeasibilities in evaluation"
-folder = "./results/12-07_multi_realization/"
+title = "Linear combination no noise"
+folder = "./results/13-07_linear_combination_no_noise/"
 use_subepoch = False # If true we plot epochs (less detailed)
 plot_training = False # If true also plot the training curve
 
