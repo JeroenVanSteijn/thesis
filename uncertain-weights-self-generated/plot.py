@@ -3,8 +3,8 @@ import numpy as np
 import pandas as pd
 from matplotlib import pyplot as plt
 
-title = "Penalty function linear in values on instances generated with 0.01 noise"
-folder = "./results/06-07_0.01_noise_multi_p_linear_values_reject_in_validation/"
+title = "Multi realization reject infeasibilities in evaluation"
+folder = "./results/12-07_multi_realization/"
 use_subepoch = False # If true we plot epochs (less detailed)
 plot_training = False # If true also plot the training curve
 

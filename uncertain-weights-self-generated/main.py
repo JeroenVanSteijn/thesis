@@ -6,14 +6,16 @@ import csv
 # Experiment variables
 epochs = 100
 penalty_function_type = "linear_values" # "linear_weights"
-folder = "./results/06-07_0.01_noise_multi_p_linear_values_reject_in_validation/"
+folder = "./results/12-07_multi_realization/"
 
 # End experiment variables
+capacity = 15 #60
+n_items = 3 #48
 
 x_train, y_train, values_train, x_validation, y_validation, values_validation = [[],[],[],[],[],[]]
 
 # Reading and formatting instance
-instance_file = './instances/0.01_noise.csv'
+instance_file = './instances/multi_realization.csv'
 file = open(instance_file)
 nr_items = len(file.readlines())
 
@@ -47,61 +49,13 @@ with open(instance_file) as csv_file:
             values_validation.append(value)
 
 # Running learners
-learner = MSE_Learner(
-    values_train=values_train,
-    values_validation=values_validation,
-    epochs=epochs,
-    optimizer=optim.Adam,
-    capacity=[60],
-    n_items=48,
-    penalty_P=1,
-    penalty_function_type=penalty_function_type,
-    reject_in_validation=True,
-    file_name=folder + "/mse_learner.py",
-)
-learner.fit(
-    x_train, y_train, x_validation, y_validation
-)
-
 learner = SGD_SPO_dp_lr(
     values_train=values_train,
     values_validation=values_validation,
     epochs=epochs,
     optimizer=optim.Adam,
-    n_items=48,
-    capacity=[60],
-    penalty_P=1,
-    penalty_function_type=penalty_function_type,
-    reject_in_validation=True,
-    file_name=folder+"/spo_learner_p1.py",
-)
-learner.fit(
-    x_train, y_train, x_validation, y_validation
-)
-
-learner = SGD_SPO_dp_lr(
-    values_train=values_train,
-    values_validation=values_validation,
-    epochs=epochs,
-    optimizer=optim.Adam,
-    n_items=48,
-    capacity=[60],
-    penalty_P=2,
-    penalty_function_type=penalty_function_type,
-    reject_in_validation=True,
-    file_name=folder+"/spo_learner_p2.py",
-)
-learner.fit(
-    x_train, y_train, x_validation, y_validation
-)
-
-learner = SGD_SPO_dp_lr(
-    values_train=values_train,
-    values_validation=values_validation,
-    epochs=epochs,
-    optimizer=optim.Adam,
-    n_items=48,
-    capacity=[60],
+    n_items=n_items,
+    capacity=[capacity],
     penalty_P=10,
     penalty_function_type=penalty_function_type,
     reject_in_validation=True,
@@ -117,8 +71,8 @@ learner = SGD_SPO_dp_lr(
     values_validation=values_validation,
     epochs=epochs,
     optimizer=optim.Adam,
-    n_items=48,
-    capacity=[60],
+    n_items=n_items,
+    capacity=[capacity],
     penalty_P=100,
     penalty_function_type=penalty_function_type,
     reject_in_validation=True,
@@ -134,12 +88,28 @@ learner = SGD_SPO_dp_lr(
     values_validation=values_validation,
     epochs=epochs,
     optimizer=optim.Adam,
-    n_items=48,
-    capacity=[60],
+    n_items=n_items,
+    capacity=[capacity],
     penalty_P=100,
     penalty_function_type=penalty_function_type,
     reject_in_validation=True,
     file_name=folder+"/spo_learner_p1000.py",
+)
+learner.fit(
+    x_train, y_train, x_validation, y_validation
+)
+
+learner = MSE_Learner(
+    values_train=values_train,
+    values_validation=values_validation,
+    epochs=epochs,
+    optimizer=optim.Adam,
+    capacity=[capacity],
+    n_items=n_items,
+    penalty_P=1,
+    penalty_function_type=penalty_function_type,
+    reject_in_validation=True,
+    file_name=folder + "/mse_learner.py",
 )
 learner.fit(
     x_train, y_train, x_validation, y_validation
