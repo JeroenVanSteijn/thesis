@@ -6,6 +6,7 @@ nr_items = 11376 # The number of knapsack items to generate
 average_weight_value_ratio = 0.2 # The average in the weight to value ratio (picked from normal distribution)
 variance_weight_value_ratio = 0 # The variance in the weight to value ratio (picked from normal distribution)
 noiseSize = 0.001 # amount of noise added to each feature
+min_value = 10
 max_value = 50 # The maximum value for 1 item (picked randomly for interval 0 - max, evenly distributed)
 random_features = True
 filename = "linear_combination_1.csv"
@@ -54,11 +55,9 @@ def generate_instances_linear_combination():
     for i in range (0, 9):
         linear_c.append(random.uniform(0.1, 0.9))
 
-    print(linear_c)
-
     result = []
     for _ in range(0, nr_items):
-        value = random.randint(0, max_value)
+        value = random.randint(min_value, max_value)
         weight_value_ratio = max(0.1, np.random.normal(average_weight_value_ratio, variance_weight_value_ratio))
         weight = np.round(value * weight_value_ratio).astype(int)
 

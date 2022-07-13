@@ -46,8 +46,8 @@ def get_objective_value_penalized_infeasibility(assignments, true_weights, value
                     total_value -= values[index]
 
                 elif penalty_function_type == "reject":
-                    # total_value -= values[index] * 2 # THIS IS A TEST TO SEE IF SETTING P = 2 for the final evaluation makes more sense.
-                    return 0, True
+                    total_value -= values[index] * 2 # THIS IS A TEST TO SEE IF SETTING P = 2 for the final evaluation makes more sense.
+                    # return 0, True
 
                 else:
                     raise Exception("Invalid penalty function type.")
