@@ -17,7 +17,7 @@ generate_multiple_realizations_small_sample = False # Experiment idea from examp
 def generate_instances_linear_combination():
     linear_c = []
     for i in range (0, 9):
-        linear_c.append(np.random.randint(1, 100))
+        linear_c.append(random.uniform(0.2, 1))
 
     result = []
     for _ in range(0, nr_items):
@@ -26,11 +26,11 @@ def generate_instances_linear_combination():
         # Generate features that can predict the true weight.
         features = []
         for i in range(0, 9):
-            newVal = random.randint(1, 10)
+            newVal = random.uniform(1, 10)
             features.append(newVal)
 
-        weight = np.round(sum([linear_c[i] * features[i] for i in range(0, 9)])).astype(int) # somewhere between 1 and 9000
-        value = np.round(weight / weight_value_ratio).astype(int) # somewhere between 5 and 45000
+        weight = np.round(sum([linear_c[i] * features[i] for i in range(0, 9)])).astype(int) # somewhere between 1 and 90
+        value = np.round(weight / weight_value_ratio).astype(int)
 
         row = features
         row.append(value)

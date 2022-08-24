@@ -11,7 +11,7 @@ penalty_function_type = "linear_values" # "linear_weights"
 results_folder = "./results/linear_combination_no_noise/"
 
 # End experiment variables
-capacity = 9000 # 60 is default
+capacity = 60 # 60 is default
 n_items = 48 # 48 is default
 
 x_train, y_train, values_train, x_validation, y_validation, values_validation = [[],[],[],[],[],[]]
@@ -36,8 +36,8 @@ for index, instance_file in enumerate(files):
             line_count += 1
             
             # Get variables for row
-            features_ints = [int(row[0]), int(row[1]), int(row[2]), int(row[3]), int(row[4]), int(row[5])]
-            features_floats = [int(row[6]), int(row[7]), int(row[8])]
+            features_ints = [float(row[0]), float(row[1]), float(row[2]), float(row[3]), float(row[4]), float(row[5])]
+            features_floats = [float(row[6]), float(row[7]), float(row[8])]
             features = features_ints + features_floats
             value = int(row[9])
             true_weight = int(row[10])
@@ -70,6 +70,7 @@ for index, instance_file in enumerate(files):
     learner.fit(
         x_train, y_train, x_validation, y_validation
     )
+
 
     learner = SGD_SPO_dp_lr(
         values_train=values_train,
