@@ -137,18 +137,6 @@ class SGD_SPO_dp_lr:
                 cnt += 1
                 subepoch += 1
                 if cnt % 20 == 0:
-                    dict_train = test_fwd(
-                        self.model,
-                        criterion,
-                        trch_X_train,
-                        trch_y_train,
-                        n_items,
-                        capacity,
-                        knaps_sol,
-                        values=self.values_train,
-                        penalty_P=self.penalty_P,
-                        penalty_function_type="reject" if self.reject_in_validation else self.penalty_function_type
-                    )
                     dict_validation = test_fwd(
                         self.model,
                         criterion,
@@ -163,9 +151,6 @@ class SGD_SPO_dp_lr:
                     )
 
                     info = {}
-                    info["train_loss"] = dict_train["loss"]
-                    info["train_regret_full"] = dict_train["regret_full"]
-                    info["train_accuracy"] = dict_train["accuracy"]
                     info["validation_loss"] = dict_validation["loss"]
                     info["validation_regret_full"] = dict_validation[
                         "regret_full"
