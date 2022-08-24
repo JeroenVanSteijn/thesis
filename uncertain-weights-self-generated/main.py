@@ -6,9 +6,9 @@ from MSE_learner import MSE_Learner
 import csv
 
 # Experiment variables
-epochs = 100
+epochs = 150
 penalty_function_type = "linear_values" # "linear_weights"
-results_folder = "./results/linear_combination_no_noise/"
+results_folder = "./results/linear_combination_20_noise/"
 
 # End experiment variables
 capacity = 60 # 60 is default
@@ -17,7 +17,7 @@ n_items = 48 # 48 is default
 x_train, y_train, values_train, x_validation, y_validation, values_validation = [[],[],[],[],[],[]]
 
 # Reading and formatting instance
-instance_folder = './instances/linear_combination_no_noise'
+instance_folder = './instances/linear_combination_20_noise'
 files = [f for f in listdir(instance_folder) if isfile(join(instance_folder, f))]
 
 for index, instance_file in enumerate(files):

@@ -3,8 +3,8 @@ import numpy as np
 import pandas as pd
 from matplotlib import pyplot as plt
 
-title = "Linear combination no noise"
-folder = "./results/linear_combination_no_noise/"
+title = "Linear combination 20 uniform noise"
+folder = "./results/linear_combination_20_noise/"
 subfolders = [ f.path for f in os.scandir(folder) if f.is_dir() ]
 nr_seeds = len(subfolders)
 
@@ -39,8 +39,10 @@ def plot():
         
         df_list = []
         for seed_index in range(0, nr_seeds):
-            df = pd.read_csv(folder + str(seed_index) + '/' + file, names=header_names, header=None)
-            df_list.append(df)
+            nr_files_current_folder = len(os.listdir(folder + str(seed_index) + '/'))
+            if nr_files_current_folder == len(files_first_folder):
+                df = pd.read_csv(folder + str(seed_index) + '/' + file, names=header_names, header=None)
+                df_list.append(df)
 
         epoch_list = df_list[0]["epoch_nr"].unique()
         regret_list = []
@@ -52,7 +54,7 @@ def plot():
         df = pd.concat(regret_list, axis=0)
 
         means = df.groupby("epoch_nr").mean()
-        stds = df.groupby("epoch_nr").std()
+        stds = df.groupby("epoch_nr").sem()
         
         filename_without_py = file.split(".py")[0]
         name_index = filenames_map.index(filename_without_py)
