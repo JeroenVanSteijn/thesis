@@ -3,19 +3,20 @@ import numpy as np
 import pandas as pd
 from matplotlib import pyplot as plt
 
-title = "Linear combination 20 uniform noise"
+title = "Reject in training"
 folder = "./results/linear_combination_20_noise/"
 subfolders = [ f.path for f in os.scandir(folder) if f.is_dir() ]
 nr_seeds = len(subfolders)
 
-filenames_map = ["mse_learner", "spo_learner_p1", "spo_learner_p2", "spo_learner_p10", "spo_learner_p100", "spo_learner_p1000"]
+filenames_map = ["mse_learner", "spo_learner_p1", "spo_learner_p2", "spo_learner_p10", "spo_learner_p100", "spo_learner_p1000", "reject"]
 titles_map = [
     "MSE",
     "SPO P=1",
     "SPO P=2",
     "SPO P=10",
     "SPO P=100",
-    "SPO P=1000"
+    "SPO P=1000",
+    "SPO Reject"
 ]
 colors_map = [
     "#e41a1c",
@@ -23,7 +24,8 @@ colors_map = [
     "#4daf4a",
     "#984ea3",
     "#ff7f00",
-    "#ffff33"
+    "#ffff33",
+    "#F781BF"
 ]
 
 def plot():
@@ -63,9 +65,9 @@ def plot():
 
         # Plot legend
         handle, = plt.plot(
-            epoch_list, regret_list_validation, c=line_color
+            epoch_list, means, c=line_color
         )
-        plt.fill_between(epoch_list, regret_list_validation-stds, regret_list_validation+stds,
+        plt.fill_between(epoch_list, means-stds, means+stds,
             alpha=0.2, edgecolor=line_color, facecolor=line_color, linewidth=0)
 
         handles.append(handle)
