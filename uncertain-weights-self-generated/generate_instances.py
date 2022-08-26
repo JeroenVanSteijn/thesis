@@ -7,9 +7,10 @@ nr_seeds = 5 # The number of times to repeat the procedure on different seeds.
 nr_items = 11376 # The number of knapsack items to generate
 average_weight_value_ratio = 0.2 # The average in the weight to value ratio (picked from normal distribution)
 variance_weight_value_ratio = 0 # The variance in the weight to value ratio (picked from normal distribution)
-noiseSize = 20 # amount of noise added to each feature
-random_features = True
-foldername = "linear_combination_20_noise"
+noiseSize = 0.1 # amount of noise added. Min = 0, Max = 100+, AVG = 5, step size around 0.1-1
+foldername = "linear_combination_0.1_noise"
+min_value = 1
+max_value = 50
 
 generate_multiple_realizations_small_sample = False # Experiment idea from example by Mathijs.
 # Otherwise: Kim's suggestion of linear combination.
@@ -17,20 +18,24 @@ generate_multiple_realizations_small_sample = False # Experiment idea from examp
 def generate_instances_linear_combination():
     linear_c = []
     for i in range (0, 9):
-        linear_c.append(random.uniform(0.2, 1))
+        linear_c.append(random.uniform(0, 0.8))
 
     result = []
     for _ in range(0, nr_items):
+        value = random.randint(min_value, max_value)
         weight_value_ratio = max(0.1, np.random.normal(average_weight_value_ratio, variance_weight_value_ratio))
+        weight = np.round(value * weight_value_ratio).astype(int)
 
         # Generate features that can predict the true weight.
         features = []
-        for i in range(0, 9):
-            newVal = random.uniform(1, 10)
+        for i in range(0, 8):
+            newVal = random.uniform(0, 8)
             features.append(newVal)
 
-        weight = np.round(sum([linear_c[i] * features[i] for i in range(0, 9)]) + random.uniform(-noiseSize, noiseSize)).astype(int) # somewhere between 1 and 90
-        value = np.round(weight / weight_value_ratio).astype(int)
+        total_weights_based_on_features = sum([linear_c[i] * features[i] for i in range(0, 8)])
+        diff_to_selected_weight = weight - total_weights_based_on_features
+        last_feature = (diff_to_selected_weight / linear_c[8]) + random.uniform(-1, 1) * noiseSize
+        features.append(last_feature)
 
         row = features
         row.append(value)
@@ -38,6 +43,38 @@ def generate_instances_linear_combination():
 
         result.append(row)
     return result
+
+
+def generate_instances_old():
+    max_value = 50
+    result = []
+    for _ in range(0, nr_items):
+        value = random.randint(0, max_value)
+        weight_value_ratio = np.round(np.random.normal(average_weight_value_ratio, variance_weight_value_ratio))
+        weight = np.round(value / weight_value_ratio).astype(int)
+
+        # Generate features that can predict the true weight.
+        features = []
+        for i in range(0, 9):
+            newVal = 0
+            if i < 6:
+                newVal = np.round(np.random.normal(weight, i) / (i + 1)).astype(int) # TODO: check if/how we like this linear combination.
+                newVal = (newVal + random.uniform(-1, 1) * noiseSize).astype(int) 
+
+            else:
+                newVal = np.random.normal(weight, i) # TODO: check if/how we like this linear combination.
+                newVal = newVal + random.uniform(-1, 1) * noiseSize
+            
+
+            features.append(newVal)
+
+        row = features
+        row.append(value)
+        row.append(weight)
+
+        result.append(row)
+    return result
+
 
 def generate_instances_multi_realize():
     item1_weights = [11,12,13,14,15,16,17,18,19,20]

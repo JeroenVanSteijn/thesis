@@ -3,8 +3,10 @@ import numpy as np
 import pandas as pd
 from matplotlib import pyplot as plt
 
-title = "Reject in training"
-folder = "./results/linear_combination_20_noise/"
+title = "Reject in evaluation"
+folder = "./results/linear_combination_0_noise_eval_linear_values/"
+# title = "P=2 in evaluation"
+# folder = "./results/linear_combination_0_noise_eval_linear_values_for_real/"
 subfolders = [ f.path for f in os.scandir(folder) if f.is_dir() ]
 nr_seeds = len(subfolders)
 

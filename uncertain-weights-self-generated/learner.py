@@ -46,8 +46,7 @@ def get_objective_value_penalized_infeasibility(assignments, true_weights, value
                     total_value -= values[index]
 
                 elif penalty_function_type == "reject":
-                    total_value -= values[index] * 2 # THIS IS A TEST TO SEE IF SETTING P = 2 for the final evaluation makes more sense.
-                    # return 0, True
+                    return 0, True
 
                 else:
                     raise Exception("Invalid penalty function type.")
@@ -115,8 +114,7 @@ def test_fwd(
     capacity,
     knaps_sol,
     values,
-    penalty_P,
-    penalty_function_type
+    eval_method
 ):
     info = dict()
     model.eval()
@@ -147,7 +145,13 @@ def test_fwd(
         assignments_true = knaps_sol[kn_nr][0]
 
         optimal_value = np.sum(values_specific * (assignments_true))
-        achieved_value, was_penalized = get_objective_value_penalized_infeasibility(assignments_pred, V_true, values_specific, capacity, penalty_P, penalty_function_type)
+
+        # Calculate values either with rejection or linear_values P = 2 for evaluation.
+        achieved_value, was_penalized = get_objective_value_penalized_infeasibility(
+            assignments_pred, V_true, values_specific, capacity, 2, "linear_values"
+        ) if eval_method == "linear_values" else  get_objective_value_penalized_infeasibility(
+            assignments_pred, V_true, values_specific, capacity, 0, "reject"
+        )
 
         if was_penalized:
             penalized_count = penalized_count + 1 

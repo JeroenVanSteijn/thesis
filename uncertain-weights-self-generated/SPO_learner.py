@@ -17,7 +17,7 @@ class SGD_SPO_dp_lr:
         optimizer,
         penalty_P,
         penalty_function_type,
-        reject_in_validation,
+        eval_method,
         file_name,
     ):
         self.n_items = n_items
@@ -29,7 +29,7 @@ class SGD_SPO_dp_lr:
         self.best_params_ = {"p": "default"}
         self.penalty_P = penalty_P
         self.penalty_function_type = penalty_function_type
-        self.reject_in_validation = reject_in_validation
+        self.eval_method = eval_method
         self.file_name = file_name
 
     def fit(
@@ -146,8 +146,7 @@ class SGD_SPO_dp_lr:
                         capacity,
                         knaps_sol_validation,
                         values=self.values_validation,
-                        penalty_P=self.penalty_P,
-                        penalty_function_type="reject" if self.reject_in_validation else self.penalty_function_type
+                        eval_method=self.eval_method
                     )
 
                     info = {}
