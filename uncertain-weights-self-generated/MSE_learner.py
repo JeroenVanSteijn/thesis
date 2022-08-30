@@ -57,22 +57,6 @@ class MSE_Learner:
         capacity = self.capacity
 
         # prepping
-        knaps_V_true = [
-            get_weights(trch_y_train, kn_nr, n_items) for kn_nr in range(n_knapsacks)
-        ]
-        knaps_values = [
-            get_values(self.values_train, kn_nr, n_items) for kn_nr in range(n_knapsacks)
-        ]
-        
-        knaps_sol = [
-            get_kn_indicators(
-                V_true,
-                capacity,
-                values=knaps_values[nr]
-            )
-            for [nr, V_true] in enumerate(knaps_V_true)
-        ]
-
         n_knapsacks_validation = len(trch_X_validation) // n_items
         knaps_values_validation = [
             get_values(self.values_validation, kn_nr, n_items)
@@ -132,7 +116,8 @@ class MSE_Learner:
                         capacity,
                         knaps_sol_validation,
                         values=self.values_validation,
-                        eval_method=self.eval_method
+                        eval_method=self.eval_method,
+                        printing=epoch_nr > 80
                     )
 
                     info = {}

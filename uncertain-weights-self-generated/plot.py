@@ -4,8 +4,8 @@ import pandas as pd
 from matplotlib import pyplot as plt
 
 noise = "0" # 0 0.1 1.0 5 20
-eval = "linear_values"
-# eval = "reject"
+# eval = "linear_values"
+eval = "reject"
 folder = f"./results/linear_combination_{noise}_noise_eval_{eval}/"
 
 def find_title_from_folder_name(file_name):

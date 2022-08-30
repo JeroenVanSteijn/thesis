@@ -9,7 +9,7 @@ average_weight_value_ratio = 0.2 # The average in the weight to value ratio (pic
 variance_weight_value_ratio = 0 # The variance in the weight to value ratio (picked from normal distribution)
 noiseSize = 0 # amount of noise added. Min = 0, Max = 100+, AVG = 5, step size around 0.1-1
 foldername = f"linear_combination_{noiseSize}_noise"
-min_value = 10
+min_value = 0
 max_value = 50
 
 generate_multiple_realizations_small_sample = False # Experiment idea from example by Mathijs.
