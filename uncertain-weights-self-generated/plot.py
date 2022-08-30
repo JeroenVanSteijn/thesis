@@ -3,21 +3,21 @@ import numpy as np
 import pandas as pd
 from matplotlib import pyplot as plt
 
-folder = "./results/multi_realization_0_noise_eval_reject/"
+noise = "0" # 0 0.1 1.0 5 20
+eval = "linear_values"
+# eval = "reject"
+folder = f"./results/linear_combination_{noise}_noise_eval_{eval}/"
 
 def find_title_from_folder_name(file_name):
     split = file_name.split("/")
     name = split[-2]
-    noise = ''.join(c for c in name if c.isdigit())
+    noise = ''.join(c for c in name if c.isdigit() or c == ".")
     eval = name.split("eval_")[-1]
-    eval_name_split = eval.split('_')
-    eval_nice_name = eval_name_split[0].title() + " ".join((" " + ele.title() for ele in eval_name_split[1:]))
+    eval_nice_name = "with penalty linear in values" if eval == "linear_values" else "with rejection"
 
-    return f"Evaluated {eval_nice_name} with {noise} noise"
+    return f"Evaluated {eval_nice_name} on instances with {noise} noise"
 
 title = find_title_from_folder_name(folder)
-# title = "P=2 in evaluation"
-# folder = "./results/linear_combination_0_noise_eval_linear_values_for_real/"
 subfolders = [ f.path for f in os.scandir(folder) if f.is_dir() ]
 nr_seeds = len(subfolders)
 

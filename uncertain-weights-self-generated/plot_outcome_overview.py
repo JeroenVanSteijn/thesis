@@ -5,7 +5,7 @@ import pandas as pd
 from matplotlib import pyplot as plt
 
 noise_levels = ["0", "0.1", "1.0", "5", "20"]
-eval_option = "reject" # "reject" or "linear_values"
+eval_option = "linear_values" # "reject" or "linear_values"
 nr_seeds = 5
 
 title = "Performance of noise levels"

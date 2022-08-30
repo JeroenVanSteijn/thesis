@@ -22,7 +22,6 @@ class MSE_Learner:
         epochs,
         n_items,
         optimizer,
-        penalty_function_type,
         eval_method,
         file_name,
     ):
@@ -33,7 +32,6 @@ class MSE_Learner:
         self.epochs = epochs
         self.optimizer = optimizer
         self.best_params_ = {"p": "default"}
-        self.penalty_function_type = penalty_function_type
         self.eval_method = eval_method
         self.file_name = file_name
 

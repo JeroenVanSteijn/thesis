@@ -7,9 +7,9 @@ nr_seeds = 5 # The number of times to repeat the procedure on different seeds.
 nr_items = 11376 # The number of knapsack items to generate
 average_weight_value_ratio = 0.2 # The average in the weight to value ratio (picked from normal distribution)
 variance_weight_value_ratio = 0 # The variance in the weight to value ratio (picked from normal distribution)
-noiseSize = 0.1 # amount of noise added. Min = 0, Max = 100+, AVG = 5, step size around 0.1-1
-foldername = "linear_combination_0.1_noise"
-min_value = 1
+noiseSize = 0 # amount of noise added. Min = 0, Max = 100+, AVG = 5, step size around 0.1-1
+foldername = f"linear_combination_{noiseSize}_noise"
+min_value = 10
 max_value = 50
 
 generate_multiple_realizations_small_sample = False # Experiment idea from example by Mathijs.
@@ -43,38 +43,6 @@ def generate_instances_linear_combination():
 
         result.append(row)
     return result
-
-
-def generate_instances_old():
-    max_value = 50
-    result = []
-    for _ in range(0, nr_items):
-        value = random.randint(0, max_value)
-        weight_value_ratio = np.round(np.random.normal(average_weight_value_ratio, variance_weight_value_ratio))
-        weight = np.round(value / weight_value_ratio).astype(int)
-
-        # Generate features that can predict the true weight.
-        features = []
-        for i in range(0, 9):
-            newVal = 0
-            if i < 6:
-                newVal = np.round(np.random.normal(weight, i) / (i + 1)).astype(int) # TODO: check if/how we like this linear combination.
-                newVal = (newVal + random.uniform(-1, 1) * noiseSize).astype(int) 
-
-            else:
-                newVal = np.random.normal(weight, i) # TODO: check if/how we like this linear combination.
-                newVal = newVal + random.uniform(-1, 1) * noiseSize
-            
-
-            features.append(newVal)
-
-        row = features
-        row.append(value)
-        row.append(weight)
-
-        result.append(row)
-    return result
-
 
 def generate_instances_multi_realize():
     item1_weights = [11,12,13,14,15,16,17,18,19,20]
