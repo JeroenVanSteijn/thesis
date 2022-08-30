@@ -6,3 +6,6 @@ generate:
 
 plot:
 	python3 ./plot.py
+
+plotf:
+	python3 ./plot_outcome_overview.py

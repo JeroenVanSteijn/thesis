@@ -3,17 +3,29 @@ import numpy as np
 import pandas as pd
 from matplotlib import pyplot as plt
 
-title = "Reject in evaluation"
-folder = "./results/linear_combination_0_noise_eval_linear_values/"
+folder = "./results/multi_realization_0_noise_eval_reject/"
+
+def find_title_from_folder_name(file_name):
+    split = file_name.split("/")
+    name = split[-2]
+    noise = ''.join(c for c in name if c.isdigit())
+    eval = name.split("eval_")[-1]
+    eval_name_split = eval.split('_')
+    eval_nice_name = eval_name_split[0].title() + " ".join((" " + ele.title() for ele in eval_name_split[1:]))
+
+    return f"Evaluated {eval_nice_name} with {noise} noise"
+
+title = find_title_from_folder_name(folder)
 # title = "P=2 in evaluation"
 # folder = "./results/linear_combination_0_noise_eval_linear_values_for_real/"
 subfolders = [ f.path for f in os.scandir(folder) if f.is_dir() ]
 nr_seeds = len(subfolders)
 
-filenames_map = ["mse_learner", "spo_learner_p1", "spo_learner_p2", "spo_learner_p10", "spo_learner_p100", "spo_learner_p1000", "reject"]
+filenames_map = ["mse_learner", "spo_learner_p1", "spo_learner_p1.5", "spo_learner_p2", "spo_learner_p10", "spo_learner_p100", "spo_learner_p1000", "reject"]
 titles_map = [
     "MSE",
     "SPO P=1",
+    "SPO P=1.5",
     "SPO P=2",
     "SPO P=10",
     "SPO P=100",
@@ -23,6 +35,7 @@ titles_map = [
 colors_map = [
     "#e41a1c",
     "#377eb8",
+    "#000000",
     "#4daf4a",
     "#984ea3",
     "#ff7f00",
@@ -67,19 +80,20 @@ def plot():
 
         # Plot legend
         handle, = plt.plot(
-            epoch_list, means, c=line_color
+            epoch_list, means, c=line_color, zorder=name_index
         )
         plt.fill_between(epoch_list, means-stds, means+stds,
             alpha=0.2, edgecolor=line_color, facecolor=line_color, linewidth=0)
 
-        handles.append(handle)
+        handles.append([handle, name_index])
         labels.append("validation " + line_title)
 
     # Plot settings
     plt.title(title)
     plt.ylabel("Regret")
 
-    handles, labels = zip(*sorted(zip(handles, labels), key = lambda x,: x[1]))
+    handles, labels = zip(*sorted(zip(handles, labels), key = lambda x,: x[0][1]))
+    handles = [handle[0] for handle in handles]
 
     plt.legend(handles=handles, labels=labels)
 

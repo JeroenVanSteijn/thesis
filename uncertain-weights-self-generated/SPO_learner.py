@@ -103,6 +103,7 @@ class SGD_SPO_dp_lr:
         test_result = []
         knapsack_nrs = [x for x in range(n_knapsacks)]
         for epoch_nr in range(num_epochs):
+            print(epoch_nr)
             random.shuffle(knapsack_nrs)  # randomly shuffle order of training
             cnt = 0
             for kn_nr in knapsack_nrs:
