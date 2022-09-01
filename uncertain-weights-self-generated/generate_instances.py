@@ -7,9 +7,9 @@ nr_seeds = 5 # The number of times to repeat the procedure on different seeds.
 nr_items = 11376 # The number of knapsack items to generate
 average_weight_value_ratio = 0.2 # The average in the weight to value ratio (picked from normal distribution)
 variance_weight_value_ratio = 0 # The variance in the weight to value ratio (picked from normal distribution)
-noiseSize = 0 # amount of noise added. Min = 0, Max = 100+, AVG = 5, step size around 0.1-1
+noiseSize = 20 # amount of noise added. Min = 0, Max = 100+, AVG = 5, step size around 0.1-1
 foldername = f"linear_combination_{noiseSize}_noise"
-min_value = 0
+min_value = 10
 max_value = 50
 
 generate_multiple_realizations_small_sample = False # Experiment idea from example by Mathijs.
@@ -34,7 +34,7 @@ def generate_instances_linear_combination():
 
         total_weights_based_on_features = sum([linear_c[i] * features[i] for i in range(0, 8)])
         diff_to_selected_weight = weight - total_weights_based_on_features
-        last_feature = (diff_to_selected_weight / linear_c[8]) + random.uniform(-1, 1) * noiseSize
+        last_feature = (diff_to_selected_weight / linear_c[8]) + (random.uniform(-1, 1) * noiseSize)
         features.append(last_feature)
 
         row = features

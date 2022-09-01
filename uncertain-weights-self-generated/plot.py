@@ -3,10 +3,9 @@ import numpy as np
 import pandas as pd
 from matplotlib import pyplot as plt
 
-noise = "0" # 0 0.1 1.0 5 20
-# eval = "linear_values"
-eval = "reject"
-folder = f"./results/linear_combination_{noise}_noise_eval_{eval}/"
+noise = "0" # 0 0.1 1.0 5 20"
+eval = "rejection" # rejection or linear_values
+folder = f"./results/linear_combination_{noise}_noise/"
 
 def find_title_from_folder_name(file_name):
     split = file_name.split("/")
@@ -21,24 +20,32 @@ title = find_title_from_folder_name(folder)
 subfolders = [ f.path for f in os.scandir(folder) if f.is_dir() ]
 nr_seeds = len(subfolders)
 
-filenames_map = ["mse_learner", "spo_learner_p1", "spo_learner_p1.5", "spo_learner_p2", "spo_learner_p10", "spo_learner_p100", "spo_learner_p1000", "reject"]
+filenames_map = ["mse_learner", "spo_learner_p1_linear_weights", "spo_learner_p1_linear_values", "spo_learner_p2_linear_weights", "spo_learner_p2_linear_values", "spo_learner_p10_linear_weights", "spo_learner_p10_linear_values", "spo_learner_p100_linear_weights", "spo_learner_p100_linear_values", "spo_learner_p1000_linear_weights", "spo_learner_p1000_linear_values", "reject"]
 titles_map = [
     "MSE",
-    "SPO P=1",
-    "SPO P=1.5",
-    "SPO P=2",
-    "SPO P=10",
-    "SPO P=100",
-    "SPO P=1000",
+    "SPO P=1 linear in weights",
+    "SPO P=1 linear in values",
+    "SPO P=2 linear in weights",
+    "SPO P=2 linear in values",
+    "SPO P=10 linear in weights",
+    "SPO P=10 linear in values",
+    "SPO P=100 linear in weights",
+    "SPO P=100 linear in values",
+    "SPO P=1000 linear in weights",
+    "SPO P=1000 linear in values",
     "SPO Reject"
 ]
 colors_map = [
     "#e41a1c",
     "#377eb8",
-    "#000000",
+    "#377eb8",
+    "#4daf4a",
     "#4daf4a",
     "#984ea3",
+    "#984ea3",
     "#ff7f00",
+    "#ff7f00",
+    "#ffff33",
     "#ffff33",
     "#F781BF"
 ]
@@ -52,7 +59,7 @@ def plot():
     
     # Iterate over the files in the first folder.
     for file in files_first_folder:
-        header_names = ["epoch_nr", "validation_regret_full"]
+        header_names = ["epoch_nr", "validation_regret_full_linear_values", "validation_regret_full_rejection"]
         
         df_list = []
         for seed_index in range(0, nr_seeds):
@@ -65,7 +72,7 @@ def plot():
         regret_list = []
 
         for df_single in df_list:
-            regret_list_validation = df_single.groupby("epoch_nr")["validation_regret_full"].mean()
+            regret_list_validation = df_single.groupby("epoch_nr")["validation_regret_full_" + eval].mean()
             regret_list.append(regret_list_validation)
 
         df = pd.concat(regret_list, axis=0)
@@ -90,7 +97,12 @@ def plot():
 
     # Plot settings
     plt.title(title)
-    plt.ylabel("Regret")
+
+    if eval == "linear_values":
+        plt.ylabel("Regret with penalty linear in values (P = 2) for infeasible solutions")
+        
+    else:
+        plt.ylabel("Regret with rejection for infeasible solutions")
 
     handles, labels = zip(*sorted(zip(handles, labels), key = lambda x,: x[0][1]))
     handles = [handle[0] for handle in handles]

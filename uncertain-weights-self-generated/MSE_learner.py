@@ -22,7 +22,6 @@ class MSE_Learner:
         epochs,
         n_items,
         optimizer,
-        eval_method,
         file_name,
     ):
         self.n_items = n_items
@@ -32,7 +31,6 @@ class MSE_Learner:
         self.epochs = epochs
         self.optimizer = optimizer
         self.best_params_ = {"p": "default"}
-        self.eval_method = eval_method
         self.file_name = file_name
 
     def fit(
@@ -116,15 +114,11 @@ class MSE_Learner:
                         capacity,
                         knaps_sol_validation,
                         values=self.values_validation,
-                        eval_method=self.eval_method,
-                        printing=epoch_nr > 80
                     )
 
                     info = {}
-                    info["validation_loss"] = dict_validation["loss"]
-                    info["validation_regret_full"] = dict_validation["regret_full"]
-                    info["validation_accuracy"] = dict_validation["accuracy"]
-                    info["subepoch"] = subepoch
+                    info["validation_regret_full_linear_values"] = dict_validation["regret_full_linear_values"]
+                    info["validation_regret_full_rejection"] = dict_validation["regret_full_rejection"]
                     info["epoch_nr"] = epoch_nr
                     test_result.append(info)
         write_results(self.file_name, test_result)

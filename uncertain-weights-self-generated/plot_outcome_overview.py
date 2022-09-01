@@ -5,7 +5,7 @@ import pandas as pd
 from matplotlib import pyplot as plt
 
 noise_levels = ["0", "0.1", "1.0", "5", "20"]
-eval_option = "linear_values" # "reject" or "linear_values"
+eval_option = "linear_values" # "rejection" or "linear_values"
 nr_seeds = 5
 
 title = "Performance of noise levels"
@@ -31,7 +31,7 @@ colors_map = [
     "#F781BF"
 ]
 
-header_names = ["epoch_nr", "validation_regret_full"]
+header_names = ["epoch_nr", "validation_regret_full_linear_values", "validation_regret_full_rejection"]
 
 def plot():
     # Set plot vars
@@ -41,7 +41,7 @@ def plot():
 
     for noise_level in noise_levels:
         for file in filenames_map:
-            folder = "./results/linear_combination_" + noise_level + "_noise_eval_" + eval_option + "/"
+            folder = "./results/linear_combination_" + noise_level + "_noise/"
             df_list = []
             for seed_index in range(0, nr_seeds):
                 try:
@@ -52,7 +52,7 @@ def plot():
             regret_list = []
 
             for df_single in df_list:
-                regret_list_validation = df_single.groupby("epoch_nr")["validation_regret_full"].mean()
+                regret_list_validation = df_single.groupby("epoch_nr")["validation_regret_full_" + eval_option].mean()
                 regret_list.append(regret_list_validation)
 
             if len(df_list) == 0:
@@ -84,7 +84,13 @@ def plot():
 
     # Plot settings
     plt.title(title + " evaluated by " + eval_option)
-    plt.ylabel("Final regret")
+
+    if eval_option == "linear_values":
+        plt.ylabel("Regret with penalty linear in values (P = 2) for infeasible solutions")
+        
+    else:
+        plt.ylabel("Regret with rejection for infeasible solutions")
+
     plt.legend(handles=handles, labels=labels)
     plt.xlabel("Noise level")
     plt.show()

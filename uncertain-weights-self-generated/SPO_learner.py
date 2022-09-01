@@ -17,7 +17,6 @@ class SGD_SPO_dp_lr:
         optimizer,
         penalty_P,
         penalty_function_type,
-        eval_method,
         file_name,
     ):
         self.n_items = n_items
@@ -29,7 +28,6 @@ class SGD_SPO_dp_lr:
         self.best_params_ = {"p": "default"}
         self.penalty_P = penalty_P
         self.penalty_function_type = penalty_function_type
-        self.eval_method = eval_method
         self.file_name = file_name
 
     def fit(
@@ -146,17 +144,16 @@ class SGD_SPO_dp_lr:
                         n_items,
                         capacity,
                         knaps_sol_validation,
-                        values=self.values_validation,
-                        eval_method=self.eval_method
+                        values=self.values_validation
                     )
 
                     info = {}
-                    info["validation_loss"] = dict_validation["loss"]
-                    info["validation_regret_full"] = dict_validation[
-                        "regret_full"
+                    info["validation_regret_full_linear_values"] = dict_validation[
+                        "regret_full_linear_values"
                     ]
-                    info["validation_accuracy"] = dict_validation["accuracy"]
-                    info["subepoch"] = subepoch
+                    info["validation_regret_full_rejection"] = dict_validation[
+                        "regret_full_rejection"
+                    ]
                     info["epoch_nr"] = epoch_nr
                     test_result.append(info)
         write_results(self.file_name, test_result)

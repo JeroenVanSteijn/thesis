@@ -3,7 +3,6 @@ import torch
 from torch import nn
 from torch.autograd import Variable
 from solving import solveKnapsackProblem
-from sklearn.metrics import confusion_matrix
 
 class LinearRegression(nn.Module):
     def __init__(self, dim_in, dim_out):
@@ -113,9 +112,7 @@ def test_fwd(
     n_items,
     capacity,
     knaps_sol,
-    values,
-    eval_method,
-    printing = False
+    values
 ):
     info = dict()
     model.eval()
@@ -128,12 +125,9 @@ def test_fwd(
     model.train()
 
     n_knap = len(V_preds) // n_items
-    regret_smooth = np.zeros(n_knap)
-    regret_full = np.zeros(n_knap)
-    cf_list = []
+    regret_full_linear_values = np.zeros(n_knap)
+    regret_full_rejection = np.zeros(n_knap)
     time = 0
-
-    penalized_count = 0
 
     # I should probably just slice the trch_y and preds arrays and feed it like that...
     for kn_nr in range(n_knap):
@@ -150,30 +144,21 @@ def test_fwd(
         optimal_value = np.sum(values_specific * (assignments_true))
 
         # Calculate values either with rejection or linear_values P = 2 for evaluation.
-        achieved_value, was_penalized = get_objective_value_penalized_infeasibility(
+        achieved_value_linear, _was_penalized = get_objective_value_penalized_infeasibility(
             assignments_pred, V_true, values_specific, capacity, 2, "linear_values"
-        ) if eval_method == "linear_values" else  get_objective_value_penalized_infeasibility(
+        )
+        regret_full_linear_values[kn_nr] = optimal_value - achieved_value_linear
+        
+        achieved_value_rejection, _was_penalized_rejection =get_objective_value_penalized_infeasibility(
             assignments_pred, V_true, values_specific, capacity, 0, "reject"
         )
+        regret_full_rejection[kn_nr] = optimal_value - achieved_value_rejection
 
-        if was_penalized:
-            penalized_count = penalized_count + 1 
-        regret_full[kn_nr] = optimal_value - achieved_value
-
-        cf = confusion_matrix(assignments_true, assignments_pred, labels=[0, 1])
-        cf_list.append(cf)
 
         time += t
 
-    info["nonzero_regrsm"] = sum(regret_smooth != 0)
-    info["nonzero_regrfl"] = sum(regret_full != 0)
-
-    info["regret_full"] = np.median(regret_full)
-    info["penalized_count"] = penalized_count
-
-    tn, fp, fn, tp = np.sum(np.stack(cf_list), axis=0).ravel()
-    info["tn"], info["fp"], info["fn"], info["tp"] = (tn, fp, fn, tp)
-    info["accuracy"] = (tn + tp) / (tn + tp + fn + fp)
-
+    info["regret_full_linear_values"] = np.median(regret_full_linear_values)
+    info["regret_full_rejection"] = np.median(regret_full_rejection)
     info["runtime"] = time
+
     return info

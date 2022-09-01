@@ -6,29 +6,18 @@ from MSE_learner import MSE_Learner
 import csv
 
 # Experiment variables
-epochs = 150
-eval_method = "linear_values" # "linear_values" or "reject"
+epochs = 100
 noise_levels = ["0", "0.1", "1.0", "5", "20"]
 
 capacity = 60  # 60 is default
 n_items = 48  # 48 is default
 
 for noise in noise_levels:
-    # eval_method = "linear_values" # "linear_values" or "reject"
-    results_folder = "./results/linear_combination_" + noise + "_noise_eval_"+eval_method+"/"
+    results_folder = "./results/linear_combination_" + noise + "_noise/"
 
-    print(f"running experiments with noise: {noise} and eval_method: {eval_method} to folder {results_folder} for {epochs} epochs")
+    print(f"running experiments with noise: {noise} to folder {results_folder} for {epochs} epochs")
 
     # End experiment variables
-
-    x_train, y_train, values_train, x_validation, y_validation, values_validation = [
-        [],
-        [],
-        [],
-        [],
-        [],
-        [],
-    ]
 
     # Reading and formatting instance
     instance_folder = "./instances/linear_combination_" + noise + "_noise"
@@ -38,6 +27,15 @@ for noise in noise_levels:
         file = open(instance_folder + "/" + instance_file)
         folder = results_folder + str(index) + "/"
         nr_items = len(file.readlines())
+
+        x_train, y_train, values_train, x_validation, y_validation, values_validation = [
+            [],
+            [],
+            [],
+            [],
+            [],
+            [],
+        ]
 
         with open(instance_folder + "/" + instance_file) as csv_file:
             csv_reader = csv.reader(csv_file, delimiter=",")
@@ -75,7 +73,19 @@ for noise in noise_levels:
                     y_validation.append(true_weight)
                     values_validation.append(value)
 
-        # Running learners
+        print("starting MSE_learner for instance_file " + instance_file)
+
+        learner = MSE_Learner(
+            values_train=values_train,
+            values_validation=values_validation,
+            epochs=epochs,
+            optimizer=optim.Adam,
+            capacity=[capacity],
+            n_items=n_items,
+            file_name=folder + "/mse_learner.py",
+        )
+        learner.fit(x_train, y_train, x_validation, y_validation)
+
         learner = SGD_SPO_dp_lr(
             values_train=values_train,
             values_validation=values_validation,
@@ -85,7 +95,6 @@ for noise in noise_levels:
             capacity=[capacity],
             penalty_P=1,
             penalty_function_type="linear_values",
-            eval_method=eval_method,
             file_name=folder + "/spo_learner_p1_linear_values.py",
         )
         learner.fit(x_train, y_train, x_validation, y_validation)
@@ -99,7 +108,6 @@ for noise in noise_levels:
             capacity=[capacity],
             penalty_P=2,
             penalty_function_type="linear_values",
-            eval_method=eval_method,
             file_name=folder + "/spo_learner_p2_linear_values.py",
         )
         learner.fit(x_train, y_train, x_validation, y_validation)
@@ -113,7 +121,6 @@ for noise in noise_levels:
             capacity=[capacity],
             penalty_P=10,
             penalty_function_type="linear_values",
-            eval_method=eval_method,
             file_name=folder + "/spo_learner_p10_linear_values.py",
         )
         learner.fit(x_train, y_train, x_validation, y_validation)
@@ -126,7 +133,6 @@ for noise in noise_levels:
             capacity=[capacity],
             penalty_P=100,
             penalty_function_type="linear_values",
-            eval_method=eval_method,
             file_name=folder + "/spo_learner_p100_linear_values.py",
         )
         learner.fit(x_train, y_train, x_validation, y_validation)
@@ -139,7 +145,6 @@ for noise in noise_levels:
             capacity=[capacity],
             penalty_P=1000,
             penalty_function_type="linear_values",
-            eval_method=eval_method,
             file_name=folder + "/spo_learner_p1000_linear_values.py",
         )
         learner.fit(x_train, y_train, x_validation, y_validation)
@@ -153,7 +158,6 @@ for noise in noise_levels:
             capacity=[capacity],
             penalty_P=1,
             penalty_function_type="linear_weights",
-            eval_method=eval_method,
             file_name=folder + "/spo_learner_p1_linear_weights.py",
         )
         learner.fit(x_train, y_train, x_validation, y_validation)
@@ -167,7 +171,6 @@ for noise in noise_levels:
             capacity=[capacity],
             penalty_P=2,
             penalty_function_type="linear_weights",
-            eval_method=eval_method,
             file_name=folder + "/spo_learner_p2_linear_weights.py",
         )
         learner.fit(x_train, y_train, x_validation, y_validation)
@@ -181,7 +184,6 @@ for noise in noise_levels:
             capacity=[capacity],
             penalty_P=10,
             penalty_function_type="linear_weights",
-            eval_method=eval_method,
             file_name=folder + "/spo_learner_p10_linear_weights.py",
         )
         learner.fit(x_train, y_train, x_validation, y_validation)
@@ -194,7 +196,6 @@ for noise in noise_levels:
             capacity=[capacity],
             penalty_P=100,
             penalty_function_type="linear_weights",
-            eval_method=eval_method,
             file_name=folder + "/spo_learner_p100_linear_weights.py",
         )
         learner.fit(x_train, y_train, x_validation, y_validation)
@@ -207,7 +208,6 @@ for noise in noise_levels:
             capacity=[capacity],
             penalty_P=1000,
             penalty_function_type="linear_weights",
-            eval_method=eval_method,
             file_name=folder + "/spo_learner_p1000_linear_weights.py",
         )
         learner.fit(x_train, y_train, x_validation, y_validation)
@@ -221,19 +221,6 @@ for noise in noise_levels:
             capacity=[capacity],
             penalty_P=2,
             penalty_function_type="reject",
-            eval_method=eval_method,
             file_name=folder + "/reject.py",
-        )
-        learner.fit(x_train, y_train, x_validation, y_validation)
-
-        learner = MSE_Learner(
-            values_train=values_train,
-            values_validation=values_validation,
-            epochs=epochs,
-            optimizer=optim.Adam,
-            capacity=[capacity],
-            n_items=n_items,
-            eval_method=eval_method,
-            file_name=folder + "/mse_learner.py",
         )
         learner.fit(x_train, y_train, x_validation, y_validation)

@@ -6,5 +6,5 @@ def write_results(file_name, info):
     f = open(file_name, 'w+')
     writer = csv.writer(f)
     for line in info:
-        writer.writerow([line["epoch_nr"], line["validation_regret_full"]])
+        writer.writerow([line["epoch_nr"], line["validation_regret_full_rejection"], line["validation_regret_full_linear_values"]])
     f.close()
