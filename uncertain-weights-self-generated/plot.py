@@ -78,7 +78,7 @@ def plot():
         df = pd.concat(regret_list, axis=0)
 
         means = df.groupby("epoch_nr").mean()
-        stds = df.groupby("epoch_nr").sem()
+        stds = df.groupby("epoch_nr").std()
         
         filename_without_py = file.split(".py")[0]
         name_index = filenames_map.index(filename_without_py)
