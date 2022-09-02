@@ -7,7 +7,7 @@ import csv
 
 # Experiment variables
 epochs = 100
-noise_levels = ["0", "0.1", "1.0", "5", "20"]
+noise_levels = ["0", "0.1", "1.0", "2", "5", "20", "100"]
 
 capacity = 60  # 60 is default
 n_items = 48  # 48 is default

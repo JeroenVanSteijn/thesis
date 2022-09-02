@@ -4,26 +4,39 @@ import numpy as np
 import pandas as pd
 from matplotlib import pyplot as plt
 
-noise_levels = ["0", "0.1", "1.0", "5", "20"]
+noise_levels = ["0", "0.1", "1.0", "2", "5", "20", "100"]
 eval_option = "linear_values" # "rejection" or "linear_values"
 nr_seeds = 5
 
-title = "Performance of noise levels"
-filenames_map = ["mse_learner", "spo_learner_p1", "spo_learner_p1.5", "spo_learner_p2", "spo_learner_p10", "spo_learner_p100", "spo_learner_p1000"]
+title = "Validation regret for instances with increasing noise"
+filenames_map = ["mse_learner",
+"spo_learner_p1_linear_values", "spo_learner_p2_linear_values", "spo_learner_p10_linear_values", "spo_learner_p100_linear_values", "spo_learner_p1000_linear_values",
+"spo_learner_p1_linear_weights", "spo_learner_p2_linear_weights", "spo_learner_p10_linear_weights", "spo_learner_p100_linear_weights", "spo_learner_p1000_linear_weights"
+"reject"
+]
+
 titles_map = [
     "MSE",
-    "SPO P=1",
-    "SPO P=1.5",
-    "SPO P=2",
-    "SPO P=10",
-    "SPO P=100",
-    "SPO P=1000",
+    "SPO P=1 linear values",
+    "SPO P=2 linear values",
+    "SPO P=10 linear values",
+    "SPO P=100 linear values",
+    "SPO P=1000 linear values",
+    "SPO P=1 linear weights",
+    "SPO P=2 linear weights",
+    "SPO P=10 linear weights",
+    "SPO P=100 linear weights",
+    "SPO P=1000 linear weights",
     "SPO Reject"
 ]
 colors_map = [
     "#e41a1c",
     "#377eb8",
-    "#000000",
+    "#4daf4a",
+    "#984ea3",
+    "#ff7f00",
+    "#ffff33",
+    "#377eb8",
     "#4daf4a",
     "#984ea3",
     "#ff7f00",
@@ -31,7 +44,7 @@ colors_map = [
     "#F781BF"
 ]
 
-header_names = ["epoch_nr", "validation_regret_full_linear_values", "validation_regret_full_rejection"]
+header_names = ["epoch_nr", "validation_regret_full_rejection", "validation_regret_full_linear_values"]
 
 def plot():
     # Set plot vars
@@ -83,7 +96,7 @@ def plot():
         labels.append("validation " + line_title)
 
     # Plot settings
-    plt.title(title + " evaluated by " + eval_option)
+    plt.title(title)
 
     if eval_option == "linear_values":
         plt.ylabel("Regret with penalty linear in values (P = 2) for infeasible solutions")
