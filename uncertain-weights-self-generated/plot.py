@@ -1,11 +1,10 @@
 import os
-import numpy as np
 import pandas as pd
 from matplotlib import pyplot as plt
 
 noise_levels = ["0", "0.1", "1.0", "2", "5", "20", "100"]
-eval = "rejection" # rejection or linear_values
-training_methods_to_plot = ["mse_learner", "spo_learner_p1_linear_values", "spo_learner_p2_linear_values", "spo_learner_p10_linear_values", "spo_learner_p100_linear_values", "spo_learner_p1000_linear_values", "reject"]
+eval = "linear_values" # rejection or linear_values
+training_methods_to_plot = ["mse_learner", "spo_learner_p1_linear_values"]
 
 # For mapping titles and colors
 filenames_map = ["mse_learner", "spo_learner_p1_linear_weights", "spo_learner_p1_linear_values", "spo_learner_p2_linear_weights", "spo_learner_p2_linear_values", "spo_learner_p10_linear_weights", "spo_learner_p10_linear_values", "spo_learner_p100_linear_weights", "spo_learner_p100_linear_values", "spo_learner_p1000_linear_weights", "spo_learner_p1000_linear_values", "reject"]
@@ -108,14 +107,14 @@ def plot():
         handles, labels = zip(*sorted(zip(handles, labels), key = lambda x,: x[0][1]))
         handles = [handle[0] for handle in handles]
 
-        plt.legend(handles=handles, labels=labels)
+        plt.legend(handles=handles, labels=labels, bbox_to_anchor=(1, 1), prop={'size': 6})
 
         plt.xlabel("Epochs")
 
         if eval == "linear_values":
-            plt.savefig(f'./images/{noise}_noise_linear_values.png', bbox_inches='tight')
+            plt.savefig(f'./images/{noise}_noise_linear_values.png', bbox_inches='tight', dpi=300)
         else:
-            plt.savefig(f'./images/{noise}_noise_reject.png', bbox_inches='tight')
+            plt.savefig(f'./images/{noise}_noise_reject.png', bbox_inches='tight', dpi=300)
 
         plt.clf()
 
