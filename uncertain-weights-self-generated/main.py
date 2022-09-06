@@ -7,13 +7,15 @@ import csv
 
 # Experiment variables
 epochs = 100
-noise_levels = ["0", "0.1", "1.0", "2", "5", "20", "100"]
+noise_levels = ["20"]
+nr_training_items = 8532
+nr_validation_items = 2844
 
 capacity = 60  # 60 is default
 n_items = 48  # 48 is default
 
 for noise in noise_levels:
-    results_folder = "./results/linear_combination_" + noise + "_noise/"
+    results_folder = "./results/linear_combination_" + noise + "_noise"
 
     print(f"running experiments with noise: {noise} to folder {results_folder} for {epochs} epochs")
 
@@ -26,7 +28,8 @@ for noise in noise_levels:
     for index, instance_file in enumerate(files):
         file = open(instance_folder + "/" + instance_file)
         folder = results_folder + str(index) + "/"
-        nr_items = len(file.readlines())
+        len_items = len(file.readlines()) 
+        nr_items = nr_training_items + nr_validation_items # len_items instead if not an instance size experiment.
 
         x_train, y_train, values_train, x_validation, y_validation, values_validation = [
             [],
@@ -45,6 +48,11 @@ for noise in noise_levels:
                 if line_count == 0:
                     line_count += 1
                     continue
+
+                # stop when line_count is the maximum for this experiment.
+                if line_count > nr_items:
+                    break
+
                 line_count += 1
 
                 # Get variables for row
@@ -61,19 +69,18 @@ for noise in noise_levels:
                 value = int(row[9])
                 true_weight = int(row[10])
 
-                # training set is size 75%
-                if line_count < nr_items * 0.75:
-                    x_train.append(features)
-                    y_train.append(true_weight)
-                    values_train.append(value)
-
-                # validation set is size 25%
-                else:
+                if line_count < nr_validation_items:
                     x_validation.append(features)
                     y_validation.append(true_weight)
                     values_validation.append(value)
 
-        print("starting MSE_learner for instance_file " + instance_file)
+                # training set is all the rest:
+                else:
+                    x_train.append(features)
+                    y_train.append(true_weight)
+                    values_train.append(value)
+
+
 
         learner = MSE_Learner(
             values_train=values_train,
@@ -85,33 +92,7 @@ for noise in noise_levels:
             file_name=folder + "/mse_learner.py",
         )
         learner.fit(x_train, y_train, x_validation, y_validation)
-
-        learner = SGD_SPO_dp_lr(
-            values_train=values_train,
-            values_validation=values_validation,
-            epochs=epochs,
-            optimizer=optim.Adam,
-            n_items=n_items,
-            capacity=[capacity],
-            penalty_P=1,
-            penalty_function_type="linear_values",
-            file_name=folder + "/spo_learner_p1_linear_values.py",
-        )
-        learner.fit(x_train, y_train, x_validation, y_validation)
-
-        learner = SGD_SPO_dp_lr(
-            values_train=values_train,
-            values_validation=values_validation,
-            epochs=epochs,
-            optimizer=optim.Adam,
-            n_items=n_items,
-            capacity=[capacity],
-            penalty_P=2,
-            penalty_function_type="linear_values",
-            file_name=folder + "/spo_learner_p2_linear_values.py",
-        )
-        learner.fit(x_train, y_train, x_validation, y_validation)
-
+        
         learner = SGD_SPO_dp_lr(
             values_train=values_train,
             values_validation=values_validation,
@@ -124,6 +105,7 @@ for noise in noise_levels:
             file_name=folder + "/spo_learner_p10_linear_values.py",
         )
         learner.fit(x_train, y_train, x_validation, y_validation)
+
         learner = SGD_SPO_dp_lr(
             values_train=values_train,
             values_validation=values_validation,
@@ -146,81 +128,5 @@ for noise in noise_levels:
             penalty_P=1000,
             penalty_function_type="linear_values",
             file_name=folder + "/spo_learner_p1000_linear_values.py",
-        )
-        learner.fit(x_train, y_train, x_validation, y_validation)
-
-        learner = SGD_SPO_dp_lr(
-            values_train=values_train,
-            values_validation=values_validation,
-            epochs=epochs,
-            optimizer=optim.Adam,
-            n_items=n_items,
-            capacity=[capacity],
-            penalty_P=1,
-            penalty_function_type="linear_weights",
-            file_name=folder + "/spo_learner_p1_linear_weights.py",
-        )
-        learner.fit(x_train, y_train, x_validation, y_validation)
-
-        learner = SGD_SPO_dp_lr(
-            values_train=values_train,
-            values_validation=values_validation,
-            epochs=epochs,
-            optimizer=optim.Adam,
-            n_items=n_items,
-            capacity=[capacity],
-            penalty_P=2,
-            penalty_function_type="linear_weights",
-            file_name=folder + "/spo_learner_p2_linear_weights.py",
-        )
-        learner.fit(x_train, y_train, x_validation, y_validation)
-
-        learner = SGD_SPO_dp_lr(
-            values_train=values_train,
-            values_validation=values_validation,
-            epochs=epochs,
-            optimizer=optim.Adam,
-            n_items=n_items,
-            capacity=[capacity],
-            penalty_P=10,
-            penalty_function_type="linear_weights",
-            file_name=folder + "/spo_learner_p10_linear_weights.py",
-        )
-        learner.fit(x_train, y_train, x_validation, y_validation)
-        learner = SGD_SPO_dp_lr(
-            values_train=values_train,
-            values_validation=values_validation,
-            epochs=epochs,
-            optimizer=optim.Adam,
-            n_items=n_items,
-            capacity=[capacity],
-            penalty_P=100,
-            penalty_function_type="linear_weights",
-            file_name=folder + "/spo_learner_p100_linear_weights.py",
-        )
-        learner.fit(x_train, y_train, x_validation, y_validation)
-        learner = SGD_SPO_dp_lr(
-            values_train=values_train,
-            values_validation=values_validation,
-            epochs=epochs,
-            optimizer=optim.Adam,
-            n_items=n_items,
-            capacity=[capacity],
-            penalty_P=1000,
-            penalty_function_type="linear_weights",
-            file_name=folder + "/spo_learner_p1000_linear_weights.py",
-        )
-        learner.fit(x_train, y_train, x_validation, y_validation)
-
-        learner = SGD_SPO_dp_lr(
-            values_train=values_train,
-            values_validation=values_validation,
-            epochs=epochs,
-            optimizer=optim.Adam,
-            n_items=n_items,
-            capacity=[capacity],
-            penalty_P=2,
-            penalty_function_type="reject",
-            file_name=folder + "/reject.py",
         )
         learner.fit(x_train, y_train, x_validation, y_validation)

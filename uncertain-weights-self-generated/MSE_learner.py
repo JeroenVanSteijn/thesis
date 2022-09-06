@@ -84,13 +84,11 @@ class MSE_Learner:
         num_epochs = self.epochs
 
         # training
-        subepoch = 0  # for logging and nice curves
         test_result = []
         knapsack_nrs = [x for x in range(n_knapsacks)]
         for epoch_nr in range(num_epochs):
             print(epoch_nr)
             random.shuffle(knapsack_nrs)  # randomly shuffle order of training
-            cnt = 0
             for kn_nr in knapsack_nrs:
                 kn_start = kn_nr * n_items
                 kn_stop = kn_start + n_items
@@ -102,23 +100,20 @@ class MSE_Learner:
                     trch_y_train[kn_start:kn_stop],
                 )
 
-                cnt += 1
-                subepoch += 1
-                if cnt % 20 == 0:
-                    dict_validation = test_fwd(
-                        self.model,
-                        criterion,
-                        trch_X_validation,
-                        trch_y_validation,
-                        n_items,
-                        capacity,
-                        knaps_sol_validation,
-                        values=self.values_validation,
-                    )
+            dict_validation = test_fwd(
+                self.model,
+                criterion,
+                trch_X_validation,
+                trch_y_validation,
+                n_items,
+                capacity,
+                knaps_sol_validation,
+                values=self.values_validation,
+            )
 
-                    info = {}
-                    info["validation_regret_full_linear_values"] = dict_validation["regret_full_linear_values"]
-                    info["validation_regret_full_rejection"] = dict_validation["regret_full_rejection"]
-                    info["epoch_nr"] = epoch_nr
-                    test_result.append(info)
+            info = {}
+            info["validation_regret_full_linear_values"] = dict_validation["regret_full_linear_values"]
+            info["validation_regret_full_rejection"] = dict_validation["regret_full_rejection"]
+            info["epoch_nr"] = epoch_nr
+            test_result.append(info)
         write_results(self.file_name, test_result)

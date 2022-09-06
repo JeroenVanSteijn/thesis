@@ -9,3 +9,6 @@ plot:
 
 plotf:
 	python3 ./plot_outcome_overview.py
+
+plots:
+	python3 ./plot_to_screen.py
