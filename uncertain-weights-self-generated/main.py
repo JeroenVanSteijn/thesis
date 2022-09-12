@@ -7,7 +7,7 @@ import csv
 
 # Experiment variables
 epochs = 100
-noise_levels = ["20"]
+noise_levels = ["0"]
 nr_training_items = 8532
 nr_validation_items = 2844
 
@@ -15,7 +15,7 @@ capacity = 60  # 60 is default
 n_items = 48  # 48 is default
 
 for noise in noise_levels:
-    results_folder = "./results/linear_combination_" + noise + "_noise"
+    results_folder = "./results/linear_combination_" + noise + "_noise/"
 
     print(f"running experiments with noise: {noise} to folder {results_folder} for {epochs} epochs")
 
