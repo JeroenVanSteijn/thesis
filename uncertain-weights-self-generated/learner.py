@@ -20,35 +20,52 @@ def get_kn_indicators(
     assignments = np.asarray(solution["assignments"])
     return assignments, solution["runtime"]
 
-def get_objective_value_penalized_infeasibility(assignments, true_weights, values, capacity, penalty_P, penalty_function_type):
+def get_objective_value_penalized_infeasibility(assignments, true_weights, values, capacity, penalty_P, penalty_function_type, predictions):
+    # First order the selected items by weight to value ratio
+    selectedItems = []
+    for index, element in enumerate(assignments):
+        if element == 1:
+            value = values[index]
+            ratio = value / predictions[index]
+            selectedItems.append([index, value, ratio])
+
+    def getSortKey(elem):
+        return elem[2] #return the ratio.
+
+    # sort descending
+    selectedItems.sort(key=getSortKey, reverse=True)
+
+    # Start the calculation
     capacity = capacity[0]
     capacity_used = 0
     total_value = 0
     infeasible = False
 
-    for index, element in enumerate(assignments):
-        if element == 1:
-            total_value += values[index]
+    for element in selectedItems:
+        index = element[0]
+        value = element[1]
 
-            new_total = capacity_used + true_weights[index]
-            if new_total <= capacity:
-                capacity_used = new_total
+        total_value += values[index]
+
+        new_total_capacity_used = capacity_used + true_weights[index]
+        if new_total_capacity_used <= capacity:
+            capacity_used = new_total_capacity_used
+        else:
+            infeasible = True
+            if penalty_function_type == "linear_weights":
+                total_value -= true_weights[index] * penalty_P
+
+            elif penalty_function_type == "linear_values":
+                total_value -= values[index] * penalty_P
+
+            elif penalty_function_type == "repair":
+                total_value -= values[index]
+
+            elif penalty_function_type == "reject":
+                return 0, True
+
             else:
-                infeasible = True
-                if penalty_function_type == "linear_weights":
-                    total_value -= true_weights[index] * penalty_P
-
-                elif penalty_function_type == "linear_values":
-                    total_value -= values[index] * penalty_P
-
-                elif penalty_function_type == "repair":
-                    total_value -= values[index]
-
-                elif penalty_function_type == "reject":
-                    return 0, True
-
-                else:
-                    raise Exception("Invalid penalty function type.")
+                raise Exception("Invalid penalty function type.")
     
     return total_value, infeasible
 
@@ -145,12 +162,12 @@ def test_fwd(
 
         # Calculate values either with rejection or linear_values P = 2 for evaluation.
         achieved_value_linear, _was_penalized = get_objective_value_penalized_infeasibility(
-            assignments_pred, V_true, values_specific, capacity, 2, "linear_values"
+            assignments_pred, V_true, values_specific, capacity, 2, "linear_values", V_pred
         )
         regret_full_linear_values[kn_nr] = optimal_value - achieved_value_linear
         
         achieved_value_rejection, _was_penalized_rejection =get_objective_value_penalized_infeasibility(
-            assignments_pred, V_true, values_specific, capacity, 0, "reject"
+            assignments_pred, V_true, values_specific, capacity, 0, "reject", V_pred
         )
         regret_full_rejection[kn_nr] = optimal_value - achieved_value_rejection
 

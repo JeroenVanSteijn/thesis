@@ -6,8 +6,8 @@ from MSE_learner import MSE_Learner
 import csv
 
 # Experiment variables
-epochs = 2000
-noise_levels = ["0"]
+epochs = 5000
+noise_levels = ["10000"]
 nr_training_items = 7500
 nr_validation_items = 2500
 
@@ -15,7 +15,7 @@ capacity = 1800  # 60 is default
 n_items = 48  # 48 is default
 
 for noise in noise_levels:
-    results_folder = f"./results/realistic_{noise}_noise"
+    results_folder = f"./results/realistic_{noise}_noise/"
 
     print(f"running experiments with noise: {noise} to folder {results_folder} for {epochs} epochs")
 
@@ -80,7 +80,18 @@ for noise in noise_levels:
                     y_train.append(true_weight)
                     values_train.append(value)
 
-
+        learner = SGD_SPO_dp_lr(
+            values_train=values_train,
+            values_validation=values_validation,
+            epochs=epochs,
+            optimizer=optim.Adam,
+            n_items=n_items,
+            capacity=[capacity],
+            penalty_P=1000,
+            penalty_function_type="linear_values",
+            file_name=folder + "/spo_learner_p1000_linear_values.py",
+        )
+        learner.fit(x_train, y_train, x_validation, y_validation)
 
         learner = MSE_Learner(
             values_train=values_train,
@@ -90,82 +101,5 @@ for noise in noise_levels:
             capacity=[capacity],
             n_items=n_items,
             file_name=folder + "/mse_learner.py",
-        )
-        learner.fit(x_train, y_train, x_validation, y_validation)
-        
-        learner = SGD_SPO_dp_lr(
-            values_train=values_train,
-            values_validation=values_validation,
-            epochs=epochs,
-            optimizer=optim.Adam,
-            n_items=n_items,
-            capacity=[capacity],
-            penalty_P=1,
-            penalty_function_type="linear_weights",
-            file_name=folder + "/spo_learner_p1_linear_weights.py",
-        )
-        learner.fit(x_train, y_train, x_validation, y_validation)
-
-        learner = SGD_SPO_dp_lr(
-            values_train=values_train,
-            values_validation=values_validation,
-            epochs=epochs,
-            optimizer=optim.Adam,
-            n_items=n_items,
-            capacity=[capacity],
-            penalty_P=1,
-            penalty_function_type="reject",
-            file_name=folder + "/spo_learner_reject.py",
-        )
-        learner.fit(x_train, y_train, x_validation, y_validation)
-
-        learner = SGD_SPO_dp_lr(
-            values_train=values_train,
-            values_validation=values_validation,
-            epochs=epochs,
-            optimizer=optim.Adam,
-            n_items=n_items,
-            capacity=[capacity],
-            penalty_P=2,
-            penalty_function_type="linear_weights",
-            file_name=folder + "/spo_learner_p2_linear_weights.py",
-        )
-        learner.fit(x_train, y_train, x_validation, y_validation)
-
-        learner = SGD_SPO_dp_lr(
-            values_train=values_train,
-            values_validation=values_validation,
-            epochs=epochs,
-            optimizer=optim.Adam,
-            n_items=n_items,
-            capacity=[capacity],
-            penalty_P=10,
-            penalty_function_type="linear_weights",
-            file_name=folder + "/spo_learner_p10_linear_weightss.py",
-        )
-        learner.fit(x_train, y_train, x_validation, y_validation)
-
-        learner = SGD_SPO_dp_lr(
-            values_train=values_train,
-            values_validation=values_validation,
-            epochs=epochs,
-            optimizer=optim.Adam,
-            n_items=n_items,
-            capacity=[capacity],
-            penalty_P=100,
-            penalty_function_type="linear_weights",
-            file_name=folder + "/spo_learner_p100_linear_weights.py",
-        )
-        learner.fit(x_train, y_train, x_validation, y_validation)
-        learner = SGD_SPO_dp_lr(
-            values_train=values_train,
-            values_validation=values_validation,
-            epochs=epochs,
-            optimizer=optim.Adam,
-            n_items=n_items,
-            capacity=[capacity],
-            penalty_P=1000,
-            penalty_function_type="linear_weights",
-            file_name=folder + "/spo_learner_p1000_linear_weights.py",
         )
         learner.fit(x_train, y_train, x_validation, y_validation)

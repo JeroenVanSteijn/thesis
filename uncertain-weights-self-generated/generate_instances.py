@@ -4,12 +4,12 @@ import random
 import numpy as np
 import pandas as pd
 
-nr_seeds = 5 # The number of times to repeat the procedure on different seeds.
+nr_seeds = 1 # The number of times to repeat the procedure on different seeds.
 nr_items = 11376 # The number of knapsack items to generate
 weight_value_ratio = 0.2
-noiseSize = 0
+noiseSize = 10000
 
-foldername = f"realistic_0_noise"
+foldername = f"realistic_10000_noise"
 min_value = 10
 max_value = 50
 
@@ -43,7 +43,7 @@ def generate_instances_linear_combination():
         for feature in features:
             newVal = feature + random.uniform(0, noiseSize)
             row.append(newVal)
-
+            
         row.append(value)
         row.append(weight)
 
@@ -71,7 +71,7 @@ def generate_instances_multi_realize():
     return result
 
 def generate_from_knap_pi_file():
-    knapPI = pd.read_csv("./knapPI/knapPI_2_10000_1000_1", header=None, delim_whitespace=True)
+    knapPI = pd.read_csv("./knapPI/knapPI_1_10000_1000_1", header=None, delim_whitespace=True)
     result = []
 
     linear_c = []
@@ -79,7 +79,6 @@ def generate_from_knap_pi_file():
         linear_c.append(random.uniform(0, 0.8))
 
     for index, row in knapPI.iterrows():
-        newRow = []
         weight = row[0]
         value = row[1]
 
@@ -92,14 +91,9 @@ def generate_from_knap_pi_file():
         total_weights_based_on_features = sum([linear_c[i] * features[i] for i in range(0, 8)])
         diff_to_selected_weight = weight - total_weights_based_on_features
         last_feature = (diff_to_selected_weight / linear_c[8])
-        features.append(last_feature)
+        features.append(last_feature + random.normalvariate(0, noiseSize))
 
-
-
-        for feature in features:
-            newVal = feature + random.uniform(0, noiseSize)
-            newRow.append(newVal)
-
+        newRow = features
         newRow.append(value)
         newRow.append(weight)
 
