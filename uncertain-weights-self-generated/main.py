@@ -15,14 +15,14 @@ capacity = 1800  # 60 is default
 n_items = 48  # 48 is default
 
 for noise in noise_levels:
-    results_folder = "./results/realistic"
+    results_folder = f"./results/realistic_{noise}_noise"
 
     print(f"running experiments with noise: {noise} to folder {results_folder} for {epochs} epochs")
 
     # End experiment variables
 
     # Reading and formatting instance
-    instance_folder = "./instances/realistic"
+    instance_folder = f"./instances/realistic_{noise}_noise"
     files = [f for f in listdir(instance_folder) if isfile(join(instance_folder, f))]
 
     for index, instance_file in enumerate(files):
