@@ -2,10 +2,10 @@ import os
 import pandas as pd
 from matplotlib import pyplot as plt
 
-folder = f"./results/linear_combination_0_noise/"
-eval = "linear_values" # rejection or linear_values
+folder = f"./results/linear_combination_10_noise/"
+eval = "rejection" # rejection or linear_values
 training_methods_to_plot = ["mse_learner", "spo_learner_p10_linear_values", "spo_learner_p100_linear_values", "spo_learner_p1000_linear_values"]
-noise = 0
+noise = 10
 
 # For mapping titles and colors
 filenames_map = ["mse_learner", "spo_learner_p1_linear_weights", "spo_learner_p1_linear_values", "spo_learner_p2_linear_weights", "spo_learner_p2_linear_values", "spo_learner_p10_linear_weights", "spo_learner_p10_linear_values", "spo_learner_p100_linear_weights", "spo_learner_p100_linear_values", "spo_learner_p1000_linear_weights", "spo_learner_p1000_linear_values", "reject"]

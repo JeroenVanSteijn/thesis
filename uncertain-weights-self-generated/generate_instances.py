@@ -6,10 +6,10 @@ import numpy as np
 nr_seeds = 5 # The number of times to repeat the procedure on different seeds.
 nr_items = 11376 # The number of knapsack items to generate
 weight_value_ratio = 0.2
-noiseSize = 0 # amount of uniform noise added. Min = 0, Max = 10 ()
+noiseSize = 20
 
 foldername = f"linear_combination_{noiseSize}_noise"
-min_value = 20
+min_value = 10
 max_value = 50
 
 generate_multiple_realizations_small_sample = False # Experiment idea from example by Mathijs.
@@ -17,7 +17,7 @@ generate_multiple_realizations_small_sample = False # Experiment idea from examp
 
 def generate_instances_linear_combination():
     linear_c = []
-    for i in range (0, 9):
+    for _ in range (0, 9):
         linear_c.append(random.uniform(0, 0.8))
 
     result = []
@@ -33,14 +33,17 @@ def generate_instances_linear_combination():
 
         total_weights_based_on_features = sum([linear_c[i] * features[i] for i in range(0, 8)])
         diff_to_selected_weight = weight - total_weights_based_on_features
-        last_feature = (diff_to_selected_weight / linear_c[8])
+        last_feature = (diff_to_selected_weight / linear_c[8]) + random.uniform(0, noiseSize)
         features.append(last_feature)
 
-        weight_with_noise = round(weight + (random.uniform(-1, 1) * noiseSize))
+        row = []
 
-        row = features
+        for feature in features:
+            newVal = feature + random.uniform(0, noiseSize)
+            row.append(newVal)
+
         row.append(value)
-        row.append(weight_with_noise)
+        row.append(weight)
 
         result.append(row)
     return result
