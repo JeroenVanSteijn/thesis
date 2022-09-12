@@ -15,7 +15,7 @@ capacity = 1800  # 60 is default
 n_items = 48  # 48 is default
 
 for noise in noise_levels:
-    results_folder = "./results/linear_combination_" + noise + "_noise"
+    results_folder = "./results/realistic"
 
     print(f"running experiments with noise: {noise} to folder {results_folder} for {epochs} epochs")
 
