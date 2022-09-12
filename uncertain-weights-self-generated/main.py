@@ -6,23 +6,23 @@ from MSE_learner import MSE_Learner
 import csv
 
 # Experiment variables
-epochs = 100
-noise_levels = ["20"]
-nr_training_items = 8532
-nr_validation_items = 2844
+epochs = 2000
+noise_levels = ["0"]
+nr_training_items = 7500
+nr_validation_items = 2500
 
-capacity = 60  # 60 is default
+capacity = 1800  # 60 is default
 n_items = 48  # 48 is default
 
 for noise in noise_levels:
-    results_folder = "./results/linear_combination_" + noise + "_noise"
+    results_folder = "./results/realistic/"
 
     print(f"running experiments with noise: {noise} to folder {results_folder} for {epochs} epochs")
 
     # End experiment variables
 
     # Reading and formatting instance
-    instance_folder = "./instances/linear_combination_" + noise + "_noise"
+    instance_folder = "./instances/realistic"
     files = [f for f in listdir(instance_folder) if isfile(join(instance_folder, f))]
 
     for index, instance_file in enumerate(files):
