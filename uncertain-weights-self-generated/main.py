@@ -7,7 +7,7 @@ import csv
 
 # Experiment variables
 epochs = 150
-noise_levels = ["10"]
+noise_levels = ["0", "0.1", "1", "2", "5", "10", "20"]
 nr_training_items = 8532
 nr_validation_items = 2844
 
@@ -80,8 +80,6 @@ for noise in noise_levels:
                     y_train.append(true_weight)
                     values_train.append(value)
 
-
-
         learner = MSE_Learner(
             values_train=values_train,
             values_validation=values_validation,
@@ -93,6 +91,19 @@ for noise in noise_levels:
         )
         learner.fit(x_train, y_train, x_validation, y_validation)
         
+        learner = SGD_SPO_dp_lr(
+            values_train=values_train,
+            values_validation=values_validation,
+            epochs=epochs,
+            optimizer=optim.Adam,
+            n_items=n_items,
+            capacity=[capacity],
+            penalty_P=1,
+            penalty_function_type="linear_values",
+            file_name=folder + "/spo_learner_p1_linear_values.py",
+        )
+        learner.fit(x_train, y_train, x_validation, y_validation)
+
         learner = SGD_SPO_dp_lr(
             values_train=values_train,
             values_validation=values_validation,

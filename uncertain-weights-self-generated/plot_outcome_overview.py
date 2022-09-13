@@ -4,20 +4,20 @@ import numpy as np
 import pandas as pd
 from matplotlib import pyplot as plt
 
-noise_levels = ["0", "0.1", "1.0", "2", "5", "20", "100"]
-eval_option = "linear_values" # "rejection" or "linear_values"
+noise_levels = ["0", "0.1", "1", "2", "5", "10", "20"]
+eval_option = "rejection" # "rejection" or "linear_values"
 nr_seeds = 5
 
 title = "Validation regret for instances with increasing noise"
 filenames_map = ["mse_learner",
 "spo_learner_p1_linear_values", "spo_learner_p2_linear_values", "spo_learner_p10_linear_values", "spo_learner_p100_linear_values", "spo_learner_p1000_linear_values",
-"spo_learner_p1_linear_weights", "spo_learner_p2_linear_weights", "spo_learner_p10_linear_weights", "spo_learner_p100_linear_weights", "spo_learner_p1000_linear_weights"
-"reject"
+"spo_learner_p1_linear_weights", "spo_learner_p2_linear_weights", "spo_learner_p10_linear_weights", "spo_learner_p100_linear_weights", "spo_learner_p1000_linear_weights",
+"spo_learner_reject"
 ]
 
 titles_map = [
     "MSE",
-    "SPO P=1 linear values",
+    "SPO Repair",
     "SPO P=2 linear values",
     "SPO P=10 linear values",
     "SPO P=100 linear values",
@@ -31,7 +31,7 @@ titles_map = [
 ]
 colors_map = [
     "#e41a1c",
-    "#377eb8",
+    "#984EA3",
     "#4daf4a",
     "#984ea3",
     "#ff7f00",
@@ -81,8 +81,8 @@ def plot():
         if len(line_points) < 1:
             continue
 
-        x = [item[1] for item in line_points]
-        y = [item[2] for item in line_points]
+        x = [float(item[1]) for item in line_points]
+        y = [float(item[2]) for item in line_points]
 
         name_index = filenames_map.index(filename)
         line_color = colors_map[name_index]
@@ -104,7 +104,8 @@ def plot():
     else:
         plt.ylabel("Regret with rejection for infeasible solutions")
 
-    plt.legend(handles=handles, labels=labels)
+    plt.legend(handles=handles, labels=labels, bbox_to_anchor=(1, 0.92), prop={'size': 8})
+    plt.xscale("log")
     plt.xlabel("Noise level")
     plt.show()
 
