@@ -2,17 +2,19 @@ import os
 import csv
 import random
 import numpy as np
+import pandas as pd
 
-nr_seeds = 5 # The number of times to repeat the procedure on different seeds.
+nr_seeds = 1 # The number of times to repeat the procedure on different seeds.
 nr_items = 11376 # The number of knapsack items to generate
 weight_value_ratio = 0.2
-noiseSize = 20
+noiseSize = 10000
 
-foldername = f"linear_combination_{noiseSize}_noise"
+foldername = f"realistic_10000_noise"
 min_value = 10
 max_value = 50
 
 generate_multiple_realizations_small_sample = False # Experiment idea from example by Mathijs.
+generate_from_knap_pi_file_example = True
 # Otherwise: Kim's suggestion of linear combination.
 
 def generate_instances_linear_combination():
@@ -33,7 +35,7 @@ def generate_instances_linear_combination():
 
         total_weights_based_on_features = sum([linear_c[i] * features[i] for i in range(0, 8)])
         diff_to_selected_weight = weight - total_weights_based_on_features
-        last_feature = (diff_to_selected_weight / linear_c[8]) + random.uniform(0, noiseSize)
+        last_feature = (diff_to_selected_weight / linear_c[8])
         features.append(last_feature)
 
         row = []
@@ -41,7 +43,7 @@ def generate_instances_linear_combination():
         for feature in features:
             newVal = feature + random.uniform(0, noiseSize)
             row.append(newVal)
-
+            
         row.append(value)
         row.append(weight)
 
@@ -68,6 +70,37 @@ def generate_instances_multi_realize():
 
     return result
 
+def generate_from_knap_pi_file():
+    knapPI = pd.read_csv("./knapPI/knapPI_1_10000_1000_1", header=None, delim_whitespace=True)
+    result = []
+
+    linear_c = []
+    for i in range (0, 9):
+        linear_c.append(random.uniform(0, 0.8))
+
+    for index, row in knapPI.iterrows():
+        weight = row[0]
+        value = row[1]
+
+        # Generate features that can predict the true weight.
+        features = []
+        for i in range(0, 8):
+            newVal = random.uniform(0, 8)
+            features.append(newVal)
+
+        total_weights_based_on_features = sum([linear_c[i] * features[i] for i in range(0, 8)])
+        diff_to_selected_weight = weight - total_weights_based_on_features
+        last_feature = (diff_to_selected_weight / linear_c[8])
+        features.append(last_feature + random.normalvariate(0, noiseSize))
+
+        newRow = features
+        newRow.append(value)
+        newRow.append(weight)
+
+        result.append(newRow)
+
+    return result
+
 
 def main():
     for index in range(0, nr_seeds):
@@ -77,6 +110,8 @@ def main():
         writer = csv.writer(f)
         if generate_multiple_realizations_small_sample:
             instances = generate_instances_multi_realize()
+        elif generate_from_knap_pi_file_example:
+            instances = generate_from_knap_pi_file()
         else:
             instances = generate_instances_linear_combination()
         header = ["feature_0", "feature_1", "feature_2", "feature_3", "feature_4", "feature_5", "feature_6", "feature_7", "feature_8", "value", "true_weight"]
