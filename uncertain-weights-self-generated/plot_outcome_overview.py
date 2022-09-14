@@ -5,7 +5,7 @@ import pandas as pd
 from matplotlib import pyplot as plt
 
 noise_levels = ["0", "0.1", "1", "2", "5", "10", "20"]
-eval_option = "rejection" # "rejection" or "linear_values"
+eval_option = "linear_values" # "rejection" or "linear_values"
 nr_seeds = 5
 
 title = "Validation regret for instances with increasing noise"
@@ -105,7 +105,6 @@ def plot():
         plt.ylabel("Regret with rejection for infeasible solutions")
 
     plt.legend(handles=handles, labels=labels, bbox_to_anchor=(1, 0.92), prop={'size': 8})
-    plt.xscale("log")
     plt.xlabel("Noise level")
     plt.show()
 

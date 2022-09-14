@@ -2,7 +2,7 @@ import os
 import pandas as pd
 from matplotlib import pyplot as plt
 
-folder = f"./results/realistic_0_noise/"
+folder = f"./results/realistic_2_noise"
 eval = "linear_values" # rejection or linear_values
 training_methods_to_plot = ["mse_learner", "spo_learner_p1000_linear_values"]
 noise = 0

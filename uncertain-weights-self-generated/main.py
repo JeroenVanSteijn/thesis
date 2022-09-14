@@ -6,15 +6,15 @@ from MSE_learner import MSE_Learner
 import csv
 
 # Experiment variables
-epochs = 5000
-noise_levels = ["10000"]
+epochs = 10000
+noise_levels = ["2"]
 nr_training_items = 7500
 nr_validation_items = 2500
-capacity = 1800  # 60 is default
+capacity = 3000  # 60 is default
 n_items = 48  # 48 is default
 
 for noise in noise_levels:
-    results_folder = f"./results/realistic_{noise}_noise/"
+    results_folder = f"./results/realistic_{noise}_noise_2/"
 
     print(f"running experiments with noise: {noise} to folder {results_folder} for {epochs} epochs")
 
