@@ -7,9 +7,9 @@ import pandas as pd
 nr_seeds = 1 # The number of times to repeat the procedure on different seeds.
 nr_items = 11376 # The number of knapsack items to generate
 weight_value_ratio = 0.2
-noiseSize = 2
+noiseSize = 1000
 
-foldername = f"realistic_2_noise"
+foldername = f"realistic_{noiseSize}_noise_1_pi"
 min_value = 10
 max_value = 50
 
@@ -71,7 +71,7 @@ def generate_instances_multi_realize():
     return result
 
 def generate_from_knap_pi_file():
-    knapPI = pd.read_csv("./knapPI/knapPI_3_10000_1000_1", header=None, delim_whitespace=True)
+    knapPI = pd.read_csv("./knapPI/knapPI_1_10000_1000_1", header=None, delim_whitespace=True)
     result = []
 
     linear_c = []
@@ -91,12 +91,12 @@ def generate_from_knap_pi_file():
         total_weights_based_on_features = sum([linear_c[i] * features[i] for i in range(0, 8)])
         diff_to_selected_weight = weight - total_weights_based_on_features
         last_feature = (diff_to_selected_weight / linear_c[8])
-        features.append(last_feature * random.normalvariate(1, noiseSize))
+        features.append(last_feature + random.normalvariate(0, noiseSize))
 
         newRow = []
 
         for feature in features:
-            newRow.append(feature * random.normalvariate(1, noiseSize))
+            newRow.append(feature + random.normalvariate(0, noiseSize))
 
         newRow.append(value)
         newRow.append(weight)

@@ -7,21 +7,21 @@ import csv
 
 # Experiment variables
 epochs = 10000
-noise_levels = ["2"]
+noise_levels = ["0", "0.1", "1" "10", "100"]
 nr_training_items = 7500
 nr_validation_items = 2500
 capacity = 3000  # 60 is default
 n_items = 48  # 48 is default
 
 for noise in noise_levels:
-    results_folder = f"./results/realistic_{noise}_noise_2/"
+    results_folder = f"./results/realistic_{noise}_noise_1_pi/"
 
     print(f"running experiments with noise: {noise} to folder {results_folder} for {epochs} epochs")
 
     # End experiment variables
 
     # Reading and formatting instance
-    instance_folder = f"./instances/realistic_{noise}_noise"
+    instance_folder = f"./instances/realistic_{noise}_noise_1_pi"
     files = [f for f in listdir(instance_folder) if isfile(join(instance_folder, f))]
 
     for index, instance_file in enumerate(files):
