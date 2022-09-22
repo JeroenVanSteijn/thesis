@@ -5,16 +5,16 @@ import numpy as np
 import pandas as pd
 
 nr_seeds = 1 # The number of times to repeat the procedure on different seeds.
-nr_items = 11376 # The number of knapsack items to generate
+nr_items = 100804 # The number of knapsack items to generate
 weight_value_ratio = 0.2
-noiseSize = 1000
+noiseSize = 20
 
-foldername = f"realistic_{noiseSize}_noise_1_pi"
+foldername = f"linear_combination_{noiseSize}_noise_"
 min_value = 10
 max_value = 50
 
 generate_multiple_realizations_small_sample = False # Experiment idea from example by Mathijs.
-generate_from_knap_pi_file_example = True
+generate_from_knap_pi_file_example = False
 # Otherwise: Kim's suggestion of linear combination.
 
 def generate_instances_linear_combination():

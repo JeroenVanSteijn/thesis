@@ -2,9 +2,9 @@ import os
 import pandas as pd
 from matplotlib import pyplot as plt
 
-noise = "1000"
-folder = f"./results/realistic_{noise}_noise_3_pi/"
-eval = "linear_values" # rejection or linear_values
+noise = "1"
+folder = f"./results/realistic_{noise}_noise_2_pi/"
+eval = "rejection" # rejection or linear_values
 training_methods_to_plot = ["mse_learner", "spo_learner_p1000_linear_values"]
 
 # For mapping titles and colors
@@ -12,7 +12,7 @@ filenames_map = ["mse_learner", "spo_learner_p1_linear_weights", "spo_learner_p1
 titles_map = [
     "MSE",
     "SPO P=1 linear in weights",
-    "SPO P=1 linear in values",
+    "SPO Repair",
     "SPO P=2 linear in weights",
     "SPO P=2 linear in values",
     "SPO P=10 linear in weights",
@@ -20,7 +20,7 @@ titles_map = [
     "SPO P=100 linear in weights",
     "SPO P=100 linear in values",
     "SPO P=1000 linear in weights",
-    "SPO P=1000 linear in values",
+    "SPO P=1000 linear in weights",
     "SPO Reject"
 ]
 colors_map = [
@@ -44,7 +44,7 @@ def find_title_from_folder_name():
     return f"Evaluated {eval_nice_name} on instances with {noise} noise"
 
 def plot():
-        title = find_title_from_folder_name()
+        title = "Performance on realistic data"
         subfolders = [ f.path for f in os.scandir(folder) if f.is_dir() ]
         nr_seeds = len(subfolders)
 
@@ -95,15 +95,15 @@ def plot():
         plt.title(title)
 
         if eval == "linear_values":
-            plt.ylabel("Regret with penalty linear in values (P = 2) for infeasible solutions")
+            plt.ylabel("Regret with penalty linear in values (P = 2)")
             
         else:
-            plt.ylabel("Regret with rejection for infeasible solutions")
+            plt.ylabel("Regret with rejection")
 
         handles, labels = zip(*sorted(zip(handles, labels), key = lambda x,: x[0][1]))
         handles = [handle[0] for handle in handles]
 
-        plt.legend(handles=handles, labels=labels, bbox_to_anchor=(1, 1), prop={'size': 6})
+        plt.legend(handles=handles, labels=labels, bbox_to_anchor=(0.95, 0.95), prop={'size': 6})
 
         plt.xlabel("Epochs")
 

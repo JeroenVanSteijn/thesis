@@ -3,11 +3,11 @@ import pandas as pd
 from matplotlib import pyplot as plt
 
 noise_levels = ["0", "0.1", "1", "2", "5", "20"]
-eval = "rejection" # rejection or linear_values
-training_methods_to_plot = ["mse_learner", "spo_learner_p1_linear_values"]
+eval = "linear_values" # rejection or linear_values
+training_methods_to_plot = ["mse_learner", "spo_learner_p1_linear_weights", "spo_learner_p2_linear_weights", "spo_learner_p10_linear_weightss", "spo_learner_p100_linear_weights", "spo_learner_p1000_linear_weights"]
 
 # For mapping titles and colors
-filenames_map = ["mse_learner", "spo_learner_p1_linear_weights", "spo_learner_p1_linear_values", "spo_learner_p2_linear_weights", "spo_learner_p2_linear_values", "spo_learner_p10_linear_weights", "spo_learner_p10_linear_values", "spo_learner_p100_linear_weights", "spo_learner_p100_linear_values", "spo_learner_p1000_linear_weights", "spo_learner_p1000_linear_values", "spo_learner_reject"]
+filenames_map = ["mse_learner", "spo_learner_p1_linear_weights", "spo_learner_p1_linear_values", "spo_learner_p2_linear_weights", "spo_learner_p2_linear_values", "spo_learner_p10_linear_weightss", "spo_learner_p10_linear_values", "spo_learner_p100_linear_weights", "spo_learner_p100_linear_values", "spo_learner_p1000_linear_weights", "spo_learner_p1000_linear_values", "spo_learner_reject"]
 titles_map = [
     "MSE",
     "SPO P=1 linear in weights",
@@ -43,7 +43,7 @@ def find_title_from_folder_name(file_name, noise):
     noise = ''.join(c for c in name if c.isdigit() or c == ".")
     eval_nice_name = "with penalty linear in values" if eval == "linear_values" else "with rejection"
 
-    return f"Evaluated {eval_nice_name} on instances with {noise} noise"
+    return f"Training rejection method on {noise} noise"
 
 def plot():
     for noise in noise_levels:
@@ -99,22 +99,22 @@ def plot():
         plt.title(title)
 
         if eval == "linear_values":
-            plt.ylabel("Regret with penalty linear in values (P = 2) for infeasible solutions")
+            plt.ylabel("Regret with penalty linear in values (P = 2)")
             
         else:
-            plt.ylabel("Regret with rejection for infeasible solutions")
+            plt.ylabel("Regret with rejection")
 
         handles, labels = zip(*sorted(zip(handles, labels), key = lambda x,: x[0][1]))
         handles = [handle[0] for handle in handles]
 
-        plt.legend(handles=handles, labels=labels, bbox_to_anchor=(1, 1), prop={'size': 6})
+        plt.legend(handles=handles, labels=labels, bbox_to_anchor=(0.95, 0.85), prop={'size': 6})
 
         plt.xlabel("Epochs")
 
         if eval == "linear_values":
-            plt.savefig(f'./images/repair/{noise}_noise_linear_values.png', bbox_inches='tight', dpi=300)
+            plt.savefig(f'./images/penalty_linear_weights/{noise}_noise_linear_values.png', bbox_inches='tight', dpi=300)
         else:
-            plt.savefig(f'./images/repair/{noise}_noise_reject.png', bbox_inches='tight', dpi=300)
+            plt.savefig(f'./images/penalty_linear_weights/{noise}_noise_reject.png', bbox_inches='tight', dpi=300)
 
         plt.clf()
 

@@ -6,9 +6,9 @@ from matplotlib import pyplot as plt
 
 noise_levels = ["0", "0.1", "1", "2", "5", "10", "20"]
 eval_option = "linear_values" # "rejection" or "linear_values"
-nr_seeds = 5
+nr_seeds = 1
 
-title = "Validation regret for instances with increasing noise"
+title = "Influence of number of training samples on 20 noise"
 filenames_map = ["mse_learner",
 "spo_learner_p1_linear_values", "spo_learner_p2_linear_values", "spo_learner_p10_linear_values", "spo_learner_p100_linear_values", "spo_learner_p1000_linear_values",
 "spo_learner_p1_linear_weights", "spo_learner_p2_linear_weights", "spo_learner_p10_linear_weights", "spo_learner_p100_linear_weights", "spo_learner_p1000_linear_weights",
@@ -52,9 +52,9 @@ def plot():
     handles = []
     points = []
 
-    for noise_level in noise_levels:
+    for nr_items in ["192", "384", "768", "1536", "3072", "6144", "12288", "24576", "49152", "98304"]:
         for file in filenames_map:
-            folder = "./results/linear_combination_" + noise_level + "_noise/"
+            folder = f"./results/linear_combination_20_noise_{nr_items}_items/"
             df_list = []
             for seed_index in range(0, nr_seeds):
                 try:
@@ -74,7 +74,7 @@ def plot():
             df = pd.concat(regret_list, axis=0)
             final_mean = df.groupby("epoch_nr").mean().iloc[-1]
             filename_without_py = file.split(".py")[0]
-            points.append([filename_without_py, noise_level, final_mean])
+            points.append([filename_without_py, nr_items, final_mean])
 
     for filename in filenames_map:
         line_points = list(filter(lambda x: x[0] == filename, points))
@@ -99,13 +99,16 @@ def plot():
     plt.title(title)
 
     if eval_option == "linear_values":
-        plt.ylabel("Regret with penalty linear in values (P = 2) for infeasible solutions")
+        plt.ylabel("Final regret with penalty linear in values (P = 2)")
         
     else:
-        plt.ylabel("Regret with rejection for infeasible solutions")
+        plt.ylabel("Final regret with rejection")
+
 
     plt.legend(handles=handles, labels=labels, bbox_to_anchor=(1, 0.92), prop={'size': 8})
-    plt.xlabel("Noise level")
+    plt.xlabel("Number of training items")
+    plt.xscale('log')
+
     plt.show()
 
 plot()
