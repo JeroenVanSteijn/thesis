@@ -5,10 +5,10 @@ import pandas as pd
 from matplotlib import pyplot as plt
 
 noise_levels = ["0", "0.1", "1", "2", "5", "10", "20"]
-eval_option = "linear_values" # "rejection" or "linear_values"
-nr_seeds = 1
+eval_option = "rejection" # "rejection" or "linear_values"
+nr_seeds = 5
 
-title = "Influence of number of training samples on 20 noise"
+title = "Performance on varying noise levels"
 filenames_map = ["mse_learner",
 "spo_learner_p1_linear_values", "spo_learner_p2_linear_values", "spo_learner_p10_linear_values", "spo_learner_p100_linear_values", "spo_learner_p1000_linear_values",
 "spo_learner_p1_linear_weights", "spo_learner_p2_linear_weights", "spo_learner_p10_linear_weights", "spo_learner_p100_linear_weights", "spo_learner_p1000_linear_weights",
@@ -52,9 +52,9 @@ def plot():
     handles = []
     points = []
 
-    for nr_items in ["192", "384", "768", "1536", "3072", "6144", "12288", "24576", "49152", "98304"]:
+    for noise in noise_levels:
         for file in filenames_map:
-            folder = f"./results/linear_combination_20_noise_{nr_items}_items/"
+            folder = f"./results/linear_combination_{noise}_noise/"
             df_list = []
             for seed_index in range(0, nr_seeds):
                 try:
@@ -73,8 +73,9 @@ def plot():
 
             df = pd.concat(regret_list, axis=0)
             final_mean = df.groupby("epoch_nr").mean().iloc[-1]
+            std = df.groupby("epoch_nr").std().iloc[-1]
             filename_without_py = file.split(".py")[0]
-            points.append([filename_without_py, nr_items, final_mean])
+            points.append([filename_without_py, noise, final_mean, std])
 
     for filename in filenames_map:
         line_points = list(filter(lambda x: x[0] == filename, points))
@@ -83,6 +84,7 @@ def plot():
 
         x = [float(item[1]) for item in line_points]
         y = [float(item[2]) for item in line_points]
+        std = [float(item[3]) for item in line_points]
 
         name_index = filenames_map.index(filename)
         line_color = colors_map[name_index]
@@ -92,6 +94,9 @@ def plot():
         handle, = plt.plot(
             x, y, c=line_color
         )
+        plt.fill_between(x,  np.subtract(y, std).tolist(),  np.add(y, std).tolist(),
+            alpha=0.2, edgecolor=line_color, facecolor=line_color, linewidth=0)
+
         handles.append(handle)
         labels.append("validation " + line_title)
 
@@ -105,9 +110,8 @@ def plot():
         plt.ylabel("Final regret with rejection")
 
 
-    plt.legend(handles=handles, labels=labels, bbox_to_anchor=(1, 0.92), prop={'size': 8})
-    plt.xlabel("Number of training items")
-    plt.xscale('log')
+    plt.legend(handles=handles, labels=labels, bbox_to_anchor=(0.95, 0.7), prop={'size': 8})
+    plt.xlabel("Noise size")
 
     plt.show()
 

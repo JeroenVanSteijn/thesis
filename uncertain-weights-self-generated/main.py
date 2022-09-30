@@ -8,7 +8,7 @@ import csv
 # Experiment variables
 epochs = 150
 noise_levels = ["20"]
-nr_training_items = 192 * 2 ** 9
+nr_training_items = 192 * 2 ** 0
 nr_validation_items = 2500
 capacity = 60  # 60 is default
 n_items = 48  # 48 is default

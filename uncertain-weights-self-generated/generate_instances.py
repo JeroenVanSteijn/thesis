@@ -4,7 +4,7 @@ import random
 import numpy as np
 import pandas as pd
 
-nr_seeds = 1 # The number of times to repeat the procedure on different seeds.
+nr_seeds = 5 # The number of times to repeat the procedure on different seeds.
 nr_items = 100804 # The number of knapsack items to generate
 weight_value_ratio = 0.2
 noiseSize = 20
