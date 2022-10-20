@@ -117,7 +117,7 @@ class SGD_SPO_dp_lr:
                     values=values_instance
                 )
                 # Objective value for 2 * theta hat - theta
-                sol_spo, _was_penalized = get_objective_value_penalized_infeasibility(assignments_spo, V_true, values_instance, capacity, self.penalty_P, self.penalty_function_type, V_spo)
+                sol_spo, _was_penalized = get_objective_value_penalized_infeasibility(assignments_spo, V_true, values_instance, capacity, self.penalty_P, self.penalty_function_type)
                 grad = (sol_spo - sol_true)
                 
                 ### what if for the whole 48 items at a time

@@ -16,17 +16,17 @@ class LinearRegression(nn.Module):
 def get_kn_indicators(
     V_pred, c, values, warmstart=None
 ):
-    solution = solveKnapsackProblem([V_pred.round().astype(int).tolist()], values, c, warmstart=warmstart)
+    solution = solveKnapsackProblem([V_pred], values, c, warmstart=warmstart)
     assignments = np.asarray(solution["assignments"])
     return assignments, solution["runtime"]
 
-def get_objective_value_penalized_infeasibility(assignments, true_weights, values, capacity, penalty_P, penalty_function_type, predictions):
+def get_objective_value_penalized_infeasibility(assignments, true_weights, values, capacity, penalty_P, penalty_function_type):
     # First order the selected items by weight to value ratio
     selectedItems = []
     for index, element in enumerate(assignments):
         if element == 1:
             value = values[index]
-            ratio = value / predictions[index]
+            ratio = value / true_weights[index]
             selectedItems.append([index, value, ratio])
 
     def getSortKey(elem):
@@ -162,12 +162,12 @@ def test_fwd(
 
         # Calculate values either with rejection or linear_values P = 2 for evaluation.
         achieved_value_linear, _was_penalized = get_objective_value_penalized_infeasibility(
-            assignments_pred, V_true, values_specific, capacity, 2, "linear_values", V_pred
+            assignments_pred, V_true, values_specific, capacity, 2, "linear_values"
         )
         regret_full_linear_values[kn_nr] = optimal_value - achieved_value_linear
         
         achieved_value_rejection, _was_penalized_rejection =get_objective_value_penalized_infeasibility(
-            assignments_pred, V_true, values_specific, capacity, 0, "reject", V_pred
+            assignments_pred, V_true, values_specific, capacity, 0, "reject"
         )
         regret_full_rejection[kn_nr] = optimal_value - achieved_value_rejection
 

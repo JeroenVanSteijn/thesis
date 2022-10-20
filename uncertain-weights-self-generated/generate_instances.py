@@ -4,17 +4,18 @@ import random
 import numpy as np
 import pandas as pd
 
-nr_seeds = 5 # The number of times to repeat the procedure on different seeds.
+nr_seeds = 1 # The number of times to repeat the procedure on different seeds.
 nr_items = 100804 # The number of knapsack items to generate
 weight_value_ratio = 0.2
 noiseSize = 20
 
-foldername = f"linear_combination_{noiseSize}_noise_"
+foldername = f"energy"
 min_value = 10
 max_value = 50
 
 generate_multiple_realizations_small_sample = False # Experiment idea from example by Mathijs.
 generate_from_knap_pi_file_example = False
+generate_from_energy_file_example = True
 # Otherwise: Kim's suggestion of linear combination.
 
 def generate_instances_linear_combination():
@@ -70,6 +71,37 @@ def generate_instances_multi_realize():
 
     return result
 
+def generate_from_energy_file():
+    result = []
+
+    for i in range(1):
+        file = pd.read_csv("./energy/train_knapsack("+ str(i) +").txt", header=None, delim_whitespace=True)
+        for _, row in file.iterrows():
+            features = [row[1], row[2], row[3], row[4], row[5], row[6], row[7], row[8]]
+            weight = row[9]
+            value = random.randint(40,50)
+
+            newRow = features
+            newRow.append(value)
+            newRow.append(weight)
+
+            result.append(newRow)
+
+    for i in range(1):
+        file = pd.read_csv("./energy/test_knapsack("+ str(i) +").txt", header=None, delim_whitespace=True)
+        for _, row in file.iterrows():
+            features = [row[1], row[2], row[3], row[4], row[5], row[6], row[7], row[8]]
+            weight = row[9]
+            value = random.randint(40,50)
+
+            newRow = features
+            newRow.append(value)
+            newRow.append(weight)
+
+            result.append(newRow)
+
+    return result
+
 def generate_from_knap_pi_file():
     knapPI = pd.read_csv("./knapPI/knapPI_1_10000_1000_1", header=None, delim_whitespace=True)
     result = []
@@ -116,6 +148,8 @@ def main():
             instances = generate_instances_multi_realize()
         elif generate_from_knap_pi_file_example:
             instances = generate_from_knap_pi_file()
+        elif generate_from_energy_file_example:
+            instances = generate_from_energy_file()
         else:
             instances = generate_instances_linear_combination()
         header = ["feature_0", "feature_1", "feature_2", "feature_3", "feature_4", "feature_5", "feature_6", "feature_7", "feature_8", "value", "true_weight"]

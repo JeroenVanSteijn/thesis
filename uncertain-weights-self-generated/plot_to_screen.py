@@ -3,9 +3,9 @@ import pandas as pd
 from matplotlib import pyplot as plt
 
 noise = "1"
-folder = f"./results/realistic_{noise}_noise_2_pi/"
-eval = "rejection" # rejection or linear_values
-training_methods_to_plot = ["mse_learner", "spo_learner_p1000_linear_values"]
+folder = f"./results/energy/"
+eval = "linear_values" # rejection or linear_values
+training_methods_to_plot = ["mse_learner", "spo_learner_p1000_linear_weights"]
 
 # For mapping titles and colors
 filenames_map = ["mse_learner", "spo_learner_p1_linear_weights", "spo_learner_p1_linear_values", "spo_learner_p2_linear_weights", "spo_learner_p2_linear_values", "spo_learner_p10_linear_weights", "spo_learner_p10_linear_values", "spo_learner_p100_linear_weights", "spo_learner_p100_linear_values", "spo_learner_p1000_linear_weights", "spo_learner_p1000_linear_values", "reject"]
