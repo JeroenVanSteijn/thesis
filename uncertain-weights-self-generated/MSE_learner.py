@@ -116,4 +116,7 @@ class MSE_Learner:
             info["validation_regret_full_rejection"] = dict_validation["regret_full_rejection"]
             info["epoch_nr"] = epoch_nr
             test_result.append(info)
+
+            print(info["validation_regret_full_linear_values"])
+            
         write_results(self.file_name, test_result)

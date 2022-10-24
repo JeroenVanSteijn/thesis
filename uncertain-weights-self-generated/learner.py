@@ -50,6 +50,7 @@ def get_objective_value_penalized_infeasibility(assignments, true_weights, value
         new_total_capacity_used = capacity_used + true_weights[index]
         if new_total_capacity_used <= capacity:
             capacity_used = new_total_capacity_used
+            
         else:
             infeasible = True
             if penalty_function_type == "linear_weights":
@@ -156,17 +157,53 @@ def test_fwd(
             V_pred, c=capacity, values=values_specific
         )
 
-        assignments_true = knaps_sol[kn_nr][0]
+        assignments_true, t = get_kn_indicators(
+            V_true, c=capacity, values=values_specific
+        )
 
-        optimal_value = np.sum(values_specific * (assignments_true))
+        optimal_value = 0
+        
+        for index, element in enumerate(assignments_true):
+            if element == 1:
+                optimal_value += values_specific[index]
 
         # Calculate values either with rejection or linear_values P = 2 for evaluation.
         achieved_value_linear, _was_penalized = get_objective_value_penalized_infeasibility(
             assignments_pred, V_true, values_specific, capacity, 2, "linear_values"
         )
         regret_full_linear_values[kn_nr] = optimal_value - achieved_value_linear
-        
-        achieved_value_rejection, _was_penalized_rejection =get_objective_value_penalized_infeasibility(
+
+        # enable_debug = True
+        # if(enable_debug):
+            # if np.array_equal(assignments_true, assignments_pred):
+            #     print("equal assignment from predictions and true values")
+
+            # if debug:
+                # print("item values:")
+                # print(values_specific)
+                
+                # print("true weights:")
+                # print(V_true)
+
+                # print("assignment on true weights:")
+                # print(assignments_true)
+
+                # print("predicted weights:")
+                # print(V_pred)
+
+                # print("assignment on predicted weights:")
+                # print(assignments_pred)
+
+                # print("objective value on optimal assignment:")
+                # print(optimal_value)
+
+                # print("achieved_ objective_value_linear_penalty:")
+                # print(achieved_value_linear)
+
+                # print("regret with linear penalty:")
+                # print(optimal_value - achieved_value_linear)
+
+        achieved_value_rejection, _was_penalized_rejection = get_objective_value_penalized_infeasibility(
             assignments_pred, V_true, values_specific, capacity, 0, "reject"
         )
         regret_full_rejection[kn_nr] = optimal_value - achieved_value_rejection
@@ -174,8 +211,7 @@ def test_fwd(
 
         time += t
 
-    info["regret_full_linear_values"] = np.median(regret_full_linear_values)
-    info["regret_full_rejection"] = np.median(regret_full_rejection)
-    info["runtime"] = time
+    info["regret_full_linear_values"] = np.mean(regret_full_linear_values)
+    info["regret_full_rejection"] = np.mean(regret_full_rejection)
 
     return info

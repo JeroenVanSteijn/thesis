@@ -74,12 +74,12 @@ def generate_instances_multi_realize():
 def generate_from_energy_file():
     result = []
 
-    for i in range(1):
+    for i in range(30):
         file = pd.read_csv("./energy/train_knapsack("+ str(i) +").txt", header=None, delim_whitespace=True)
         for _, row in file.iterrows():
             features = [row[1], row[2], row[3], row[4], row[5], row[6], row[7], row[8]]
             weight = row[9]
-            value = random.randint(40,50)
+            value = random.randint(min_value,max_value)
 
             newRow = features
             newRow.append(value)
@@ -87,12 +87,12 @@ def generate_from_energy_file():
 
             result.append(newRow)
 
-    for i in range(1):
+    for i in range(30):
         file = pd.read_csv("./energy/test_knapsack("+ str(i) +").txt", header=None, delim_whitespace=True)
         for _, row in file.iterrows():
             features = [row[1], row[2], row[3], row[4], row[5], row[6], row[7], row[8]]
             weight = row[9]
-            value = random.randint(40,50)
+            value = random.randint(min_value,max_value)
 
             newRow = features
             newRow.append(value)

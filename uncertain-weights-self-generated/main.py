@@ -7,8 +7,8 @@ import csv
 
 # Experiment variables
 epochs = 100
-nr_training_items = 5520 * 1
-nr_validation_items = 2370 * 1
+nr_training_items = 5520 * 30
+nr_validation_items = 2370 * 30
 capacity = 100  # 60 is default
 n_items = 10  # 48 is default
 
@@ -66,7 +66,7 @@ for index, instance_file in enumerate(files):
             value = int(row[8])
             true_weight = float(row[9])
 
-            if line_count < nr_validation_items:
+            if line_count > nr_training_items:
                 x_validation.append(features)
                 y_validation.append(true_weight)
                 values_validation.append(value)
