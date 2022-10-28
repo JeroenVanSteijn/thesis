@@ -10,7 +10,7 @@ def solveKnapsackProblem(weights, profits, capacity, warmstart=None):
     m.setParam("OutputFlag", 0)
     x = {}
     for i in range(n):
-        x[(i)] = m.addVar(lb=0, ub=1, name="x" + str(i))
+        x[(i)] = m.addVar(lb=0, ub=1, name="x" + str(i), vtype=GRB.BINARY)
 
     if warmstart is not None:
         for i in range(n):
@@ -30,7 +30,8 @@ def solveKnapsackProblem(weights, profits, capacity, warmstart=None):
             solution_info["objective"] = m.objVal
             m_on = m.getAttr("x", x)
             sol = list(m_on.values())
-            solution_info["assignments"] = [int(i) for i in sol]
+            # Had some floating point errors here with 0.999999 returned from Gurobipy.
+            solution_info["assignments"] = [1 if i > 0.99 else 0 for i in sol]
     except:
         print("SOME EXCEPTION HAPPENED! RETURNING GARBAGE\n")
         val = 0

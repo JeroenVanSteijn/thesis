@@ -9,7 +9,7 @@ import csv
 epochs = 100
 nr_training_items = 5520 * 30
 nr_validation_items = 2370 * 30
-capacity = 100  # 60 is default
+capacity = 300  # 60 is default
 n_items = 10  # 48 is default
 
 results_folder = f"./results/energy/"
@@ -63,7 +63,7 @@ for index, instance_file in enumerate(files):
                 float(row[6]),
                 float(row[7]),
             ]
-            value = int(row[8])
+            value = float(row[8])
             true_weight = float(row[9])
 
             if line_count > nr_training_items:
@@ -77,19 +77,18 @@ for index, instance_file in enumerate(files):
                 y_train.append(true_weight)
                 values_train.append(value)
 
-    learner = SGD_SPO_dp_lr(
-        values_train=values_train,
-        values_validation=values_validation,
-        epochs=epochs,
-        optimizer=optim.Adam,
-        n_items=n_items,
-        capacity=[capacity],
-        penalty_P=1000,
-        penalty_function_type="linear_weights",
-        file_name=folder + "/spo_learner_p1000_linear_weights.py",
-    )
-    learner.fit(x_train, y_train, x_validation, y_validation)
-
+    # learner = SGD_SPO_dp_lr(
+    #     values_train=values_train,
+    #     values_validation=values_validation,
+    #     epochs=epochs,
+    #     optimizer=optim.Adam,
+    #     n_items=n_items,
+    #     capacity=[capacity],
+    #     penalty_P=1000,
+    #     penalty_function_type="linear_weights",
+    #     file_name=folder + "/spo_learner_p1000_linear_weights.py",
+    # )
+    # learner.fit(x_train, y_train, x_validation, y_validation)
 
     learner = MSE_Learner(
         values_train=values_train,

@@ -26,7 +26,10 @@ def get_objective_value_penalized_infeasibility(assignments, true_weights, value
     for index, element in enumerate(assignments):
         if element == 1:
             value = values[index]
-            ratio = value / true_weights[index]
+            ratio = 99
+            # New dataset has 0 weights included
+            if true_weights[index] > 0.01:
+                ratio = value / true_weights[index]
             selectedItems.append([index, value, ratio])
 
     def getSortKey(elem):
@@ -78,7 +81,7 @@ def get_data(trch, kn_nr, n_items):
 def get_weights(trch_y, kn_nr, n_items):
     kn_start = kn_nr * n_items
     kn_stop = kn_start + n_items
-    return trch_y[kn_start:kn_stop].data.numpy().T[0]
+    return trch_y[kn_start:kn_stop].data.numpy().T[0].tolist()
 
 def get_values(values, kn_nr, n_items):
     kn_start = kn_nr * n_items
@@ -169,39 +172,37 @@ def test_fwd(
 
         # Calculate values either with rejection or linear_values P = 2 for evaluation.
         achieved_value_linear, _was_penalized = get_objective_value_penalized_infeasibility(
-            assignments_pred, V_true, values_specific, capacity, 2, "linear_values"
+            assignments_pred, V_true, values_specific, capacity, 1.1, "linear_values"
         )
         regret_full_linear_values[kn_nr] = optimal_value - achieved_value_linear
 
-        # enable_debug = True
-        # if(enable_debug):
-            # if np.array_equal(assignments_true, assignments_pred):
-            #     print("equal assignment from predictions and true values")
-
-            # if debug:
-                # print("item values:")
-                # print(values_specific)
+        enable_debug = False
+        if(enable_debug):
+            if regret_full_linear_values[kn_nr] < 0:
+                print("knr:" + str(kn_nr))
+                print("item values:")
+                print(values_specific)
                 
-                # print("true weights:")
-                # print(V_true)
+                print("true weights:")
+                print(V_true)
 
-                # print("assignment on true weights:")
-                # print(assignments_true)
+                print("assignment on true weights:")
+                print(assignments_true)
 
-                # print("predicted weights:")
-                # print(V_pred)
+                print("predicted weights:")
+                print(V_pred)
 
-                # print("assignment on predicted weights:")
-                # print(assignments_pred)
+                print("assignment on predicted weights:")
+                print(assignments_pred)
 
-                # print("objective value on optimal assignment:")
-                # print(optimal_value)
+                print("objective value on optimal assignment:")
+                print(optimal_value)
 
-                # print("achieved_ objective_value_linear_penalty:")
-                # print(achieved_value_linear)
+                print("achieved_ objective_value_linear_penalty:")
+                print(achieved_value_linear)
 
-                # print("regret with linear penalty:")
-                # print(optimal_value - achieved_value_linear)
+                print("regret with linear penalty:")
+                print(optimal_value - achieved_value_linear)
 
         achieved_value_rejection, _was_penalized_rejection = get_objective_value_penalized_infeasibility(
             assignments_pred, V_true, values_specific, capacity, 0, "reject"

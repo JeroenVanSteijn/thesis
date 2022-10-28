@@ -79,7 +79,7 @@ def generate_from_energy_file():
         for _, row in file.iterrows():
             features = [row[1], row[2], row[3], row[4], row[5], row[6], row[7], row[8]]
             weight = row[9]
-            value = random.randint(min_value,max_value)
+            value = weight * 5 + random.normalvariate(5, 1)
 
             newRow = features
             newRow.append(value)
@@ -92,7 +92,7 @@ def generate_from_energy_file():
         for _, row in file.iterrows():
             features = [row[1], row[2], row[3], row[4], row[5], row[6], row[7], row[8]]
             weight = row[9]
-            value = random.randint(min_value,max_value)
+            value = weight * 5 + random.normalvariate(5, 1)
 
             newRow = features
             newRow.append(value)
@@ -112,7 +112,7 @@ def generate_from_knap_pi_file():
 
     for index, row in knapPI.iterrows():
         weight = row[0]
-        value = row[1]
+        value = random.randint(min_value,max_value)
 
         # Generate features that can predict the true weight.
         features = []
