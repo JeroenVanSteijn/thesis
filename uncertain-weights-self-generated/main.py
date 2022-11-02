@@ -6,13 +6,13 @@ from MSE_learner import MSE_Learner
 import csv
 
 # Experiment variables
-epochs = 100
+epochs = 10
 nr_training_items = 5520 * 30
 nr_validation_items = 2370 * 30
 capacity = 300  # 60 is default
 n_items = 10  # 48 is default
 
-results_folder = f"./results/energy/"
+results_folder = f"./results/energy_{capacity}/"
 
 print(f"running experiments and saving results to folder {results_folder} for {epochs} epochs")
 
@@ -77,18 +77,18 @@ for index, instance_file in enumerate(files):
                 y_train.append(true_weight)
                 values_train.append(value)
 
-    # learner = SGD_SPO_dp_lr(
-    #     values_train=values_train,
-    #     values_validation=values_validation,
-    #     epochs=epochs,
-    #     optimizer=optim.Adam,
-    #     n_items=n_items,
-    #     capacity=[capacity],
-    #     penalty_P=1000,
-    #     penalty_function_type="linear_weights",
-    #     file_name=folder + "/spo_learner_p1000_linear_weights.py",
-    # )
-    # learner.fit(x_train, y_train, x_validation, y_validation)
+    learner = SGD_SPO_dp_lr(
+        values_train=values_train,
+        values_validation=values_validation,
+        epochs=epochs,
+        optimizer=optim.Adam,
+        n_items=n_items,
+        capacity=[capacity],
+        penalty_P=1000,
+        penalty_function_type="linear_weights",
+        file_name=folder + "/spo_learner_p1000_linear_weights.py",
+    )
+    learner.fit(x_train, y_train, x_validation, y_validation)
 
     learner = MSE_Learner(
         values_train=values_train,

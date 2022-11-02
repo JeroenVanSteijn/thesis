@@ -33,7 +33,7 @@ def get_objective_value_penalized_infeasibility(assignments, true_weights, value
             selectedItems.append([index, value, ratio])
 
     def getSortKey(elem):
-        return elem[2] #return the ratio.
+        return (elem[2], elem[1]) #return the ratio.
 
     # sort descending
     selectedItems.sort(key=getSortKey, reverse=True)

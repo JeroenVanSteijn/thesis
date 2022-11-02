@@ -99,8 +99,9 @@ class SGD_SPO_dp_lr:
         # training
         test_result = []
         knapsack_nrs = [x for x in range(n_knapsacks)]
+        subepoch = 0
         for epoch_nr in range(num_epochs):
-            print(epoch_nr)
+            print("epoch_nr: ", epoch_nr)
             random.shuffle(knapsack_nrs)  # randomly shuffle order of training
             for kn_nr in knapsack_nrs:
                 V_true = knaps_V_true[kn_nr]
@@ -131,28 +132,32 @@ class SGD_SPO_dp_lr:
                     torch.from_numpy(np.array([grad]).T).float(),
                 )
 
-            dict_validation = test_fwd(
-                self.model,
-                criterion,
-                trch_X_validation,
-                trch_y_validation,
-                n_items,
-                capacity,
-                knaps_sol_validation,
-                values=self.values_validation
-            )
+                if (kn_nr % 1500 == 1) or (kn_nr == len(knapsack_nrs) - 1):
+                    dict_validation = test_fwd(
+                        self.model,
+                        criterion,
+                        trch_X_validation,
+                        trch_y_validation,
+                        n_items,
+                        capacity,
+                        knaps_sol_validation,
+                        values=self.values_validation
+                    )
 
-            info = {}
-            info["validation_regret_full_linear_values"] = dict_validation[
-                "regret_full_linear_values"
-            ]
-            info["validation_regret_full_rejection"] = dict_validation[
-                "regret_full_rejection"
-            ]
-            info["epoch_nr"] = epoch_nr
+                    info = {}
+                    info["validation_regret_full_linear_values"] = dict_validation[
+                        "regret_full_linear_values"
+                    ]
+                    info["validation_regret_full_rejection"] = dict_validation[
+                        "regret_full_rejection"
+                    ]
+                    info["epoch_nr"] = epoch_nr
+                    info["subepoch"] = subepoch
+                    print("subepoch: ", info["subepoch"])
+                    print("penalized: ", info["validation_regret_full_linear_values"])
+                    print("rejected: ", info["validation_regret_full_rejection"])
 
-            print(info["validation_regret_full_linear_values"])
-
-            test_result.append(info)
+                    test_result.append(info)
+                    subepoch = subepoch + 1
 
         write_results(self.file_name, test_result)
