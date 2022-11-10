@@ -4,19 +4,19 @@ import random
 import numpy as np
 import pandas as pd
 
-nr_seeds = 1 # The number of times to repeat the procedure on different seeds.
+nr_seeds = 5 # The number of times to repeat the procedure on different seeds.
 nr_items = 100804 # The number of knapsack items to generate
-weight_value_ratio = 0.2
-noiseSize = 20
+weight_value_ratio = 0.2 # The weight to value ratio of each item.
+noiseSize = 20 # The amount of noise to add to the feature data.
 
-foldername = f"energy"
-min_value = 10
-max_value = 50
+foldername = f"linear_combination_20_noise" # The folder name to store the instances in.
+min_value = 10 # The minimum value.
+max_value = 50 # The maximum value.
 
-generate_multiple_realizations_small_sample = False # Experiment idea from example by Mathijs.
-generate_from_knap_pi_file_example = False
-generate_from_energy_file_example = True
-# Otherwise: Kim's suggestion of linear combination.
+generate_multiple_realizations_small_sample = False # Multiple realizations experiment data.
+generate_from_knap_pi_file_example = False # Instances based on the 'knappi' instances.
+generate_from_energy_file_example = True # Instances based on the ICON energy price data.
+# Otherwise: use a linear combination to generate the weights from a uniform distribution.
 
 def generate_instances_linear_combination():
     linear_c = []

@@ -86,7 +86,7 @@ for index, instance_file in enumerate(files):
         capacity=[capacity],
         penalty_P=1000,
         penalty_function_type="linear_weights",
-        file_name=folder + "/spo_learner_p1000_linear_weights.py",
+        file_name=folder + "/spo_learner_p1000_linear_weights.py", # Where to store the results.
     )
     learner.fit(x_train, y_train, x_validation, y_validation)
 
@@ -97,6 +97,6 @@ for index, instance_file in enumerate(files):
         optimizer=optim.Adam,
         capacity=[capacity],
         n_items=n_items,
-        file_name=folder + "/mse_learner.py",
+        file_name=folder + "/mse_learner.py",  # Where to store the results.
     )
     learner.fit(x_train, y_train, x_validation, y_validation)
